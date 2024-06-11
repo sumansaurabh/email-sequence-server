@@ -28,8 +28,9 @@ export class EmailService {
   ): Promise<Email> {
     const email = this.emailRepository.create({ recipient, subject, body });
 
-    const trackingPixel = `<img src="http://localhost:3000/email/track/${email.id}" style="display:none;" />`;
-    const emailBodyWithTracking = `${body}<br>${trackingPixel}<br><a href="http://localhost:3000/email/unsubscribe?email=${recipient}">Unsubscribe</a>`;
+    const webUrl = process.env.WEB_URL;
+    const trackingPixel = `<img src="${webUrl}/email/track/${email.id}" style="display:none;" />`;
+    const emailBodyWithTracking = `${body}<br>${trackingPixel}<br><a href="${webUrl}/email/unsubscribe?email=${recipient}">Unsubscribe</a>`;
 
     try {
       const info = await this.transporter.sendMail({
