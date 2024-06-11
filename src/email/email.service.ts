@@ -24,6 +24,15 @@ export class EmailService {
     private emailSequenceRepository: Repository<EmailSequence>,
   ) {}
 
+  /**
+   * Asynchronously creates a sequence of emails.
+   * 
+   * @param sequenceName The name of the email sequence.
+   * @param recipient The recipient of the emails.
+   * @param emails An array of objects containing email details including subject, body, and days after the previous email.
+   * 
+   * @throws {Error} If there is an error during the creation or saving of emails or email sequences.
+   */
   async createSequence(
     sequenceName: string,
     recipient: string,
@@ -46,6 +55,11 @@ export class EmailService {
     }
   }
 
+  /**
+   * Asynchronously sends scheduled emails.
+   * Retrieves email sequences that have not been sent yet and sends emails accordingly.
+   * @throws {Error} If there is an error during the process.
+   */
   async sendScheduledEmails() {
     const sequences = await this.emailSequenceRepository.find({
       where: { sent: false },
@@ -62,6 +76,13 @@ export class EmailService {
     }
   }
 
+  /**
+   * Checks if an email should be sent based on the provided EmailSequence.
+   * 
+   * @param sequence The EmailSequence object containing information about the email sequence.
+   * @returns A boolean value indicating whether the email should be sent.
+   * @throws None
+   */
   private shouldSendEmail(sequence: EmailSequence): boolean {
     const previousEmailDate = new Date(sequence.createdAt);
     const sendDate = new Date(
@@ -71,6 +92,12 @@ export class EmailService {
     return new Date() >= sendDate;
   }
 
+  /**
+   * Asynchronously sends an email with tracking information.
+   * 
+   * @param email - The email object containing recipient, subject, and body.
+   * @throws Error - If there is an error sending the email.
+   */
   async sendEmail(email: Email) {
     const trackingPixel = `<img src="${process.env.WEB_URL}/email/track/${email.id}" style="display:none;" />`;
     const emailBodyWithTracking = `${email.body}<br>${trackingPixel}<br><a href="${process.env.WEB_URL}/email/unsubscribe?email=${email.recipient}">Unsubscribe</a>`;
