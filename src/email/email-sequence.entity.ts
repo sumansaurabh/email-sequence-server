@@ -2,39 +2,32 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Email } from './email.entity';
 
 @Entity()
-export class Email {
+export class EmailSequence {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  recipient: string;
+  @ManyToOne(() => Email)
+  email: Email;
 
   @Column()
-  subject: string;
+  sequenceName: string;
 
   @Column()
-  body: string;
+  daysAfterPrevious: number;
 
   @Column({ default: false })
-  delivered: boolean;
-
-  @Column({ nullable: true })
-  deliveryStatus: string;
-
-  @Column({ default: false })
-  opened: boolean;
+  sent: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Column({ nullable: true })
-  domainName: string;
 }

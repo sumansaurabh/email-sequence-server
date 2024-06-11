@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Email } from './email.entity';
+import { EmailSequence } from './email-sequence.entity';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -19,24 +20,66 @@ export class EmailService {
   constructor(
     @InjectRepository(Email)
     private emailRepository: Repository<Email>,
+    @InjectRepository(EmailSequence)
+    private emailSequenceRepository: Repository<EmailSequence>,
   ) {}
 
-  async sendEmail(
+  async createSequence(
+    sequenceName: string,
     recipient: string,
-    subject: string,
-    body: string,
-  ): Promise<Email> {
-    const email = this.emailRepository.create({ recipient, subject, body });
+    emails: { subject: string; body: string; daysAfterPrevious: number }[],
+  ) {
+    for (const emailData of emails) {
+      const email = this.emailRepository.create({
+        recipient,
+        subject: emailData.subject,
+        body: emailData.body,
+      });
+      await this.emailRepository.save(email);
 
-    const webUrl = process.env.WEB_URL;
-    const trackingPixel = `<img src="${webUrl}/email/track/${email.id}" style="display:none;" />`;
-    const emailBodyWithTracking = `${body}<br>${trackingPixel}<br><a href="${webUrl}/email/unsubscribe?email=${recipient}">Unsubscribe</a>`;
+      const emailSequence = this.emailSequenceRepository.create({
+        sequenceName,
+        email,
+        daysAfterPrevious: emailData.daysAfterPrevious,
+      });
+      await this.emailSequenceRepository.save(emailSequence);
+    }
+  }
+
+  async sendScheduledEmails() {
+    const sequences = await this.emailSequenceRepository.find({
+      where: { sent: false },
+      relations: ['email'],
+    });
+
+    for (const sequence of sequences) {
+      const shouldSendEmail = this.shouldSendEmail(sequence);
+      if (shouldSendEmail) {
+        await this.sendEmail(sequence.email);
+        sequence.sent = true;
+        await this.emailSequenceRepository.save(sequence);
+      }
+    }
+  }
+
+  private shouldSendEmail(sequence: EmailSequence): boolean {
+    const previousEmailDate = new Date(sequence.createdAt);
+    const sendDate = new Date(
+      previousEmailDate.getTime() +
+        sequence.daysAfterPrevious * 24 * 60 * 60 * 1000,
+    );
+    return new Date() >= sendDate;
+  }
+
+  async sendEmail(email: Email) {
+    const trackingPixel = `<img src="${process.env.WEB_URL}/email/track/${email.id}" style="display:none;" />`;
+    const emailBodyWithTracking = `${email.body}<br>${trackingPixel}<br><a href="${process.env.WEB_URL}/email/unsubscribe?email=${email.recipient}">Unsubscribe</a>`;
 
     try {
       const info = await this.transporter.sendMail({
         from: '"Your Name" <your-email@example.com>',
-        to: recipient,
-        subject,
+        to: email.recipient,
+        subject: email.subject,
         html: emailBodyWithTracking,
       });
       email.delivered = true;
@@ -46,7 +89,7 @@ export class EmailService {
       email.deliveryStatus = error.message;
     }
 
-    return this.emailRepository.save(email);
+    await this.emailRepository.save(email);
   }
 
   async trackEmail(id: number): Promise<void> {
