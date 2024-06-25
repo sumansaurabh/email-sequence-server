@@ -1,77 +1,78 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    CreateDateColumn,
-    UpdateDateColumn,
-  } from 'typeorm';
-  
-  @Entity()
-  export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
-  
-    @Column({ unique: true})
-    email: string;
-  
-    @Column()
-    firstName: string;
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
+import { BaseDbEntity } from './basedb.entity';
 
-    @Column()
-    lastName: string;
+@Entity()
+export class User extends BaseDbEntity{
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    dob: Date;
+  @Index({ unique: true })
+  email: string;
 
-    @Column()
-    phone: string;
+  @Column()
+  firstName: string;
 
-    @Column()
-    address: string;
+  @Column()
+  lastName: string;
 
-    @Column()
-    city: string;
+  @Column()
+  dob: Date;
 
-    @Column()
-    state: string;
+  @Column()
+  phone: string;
 
-    @Column()
-    zip: string;
+  @Column()
+  address: string;
 
-    @Column()
-    country: string;
+  @Column()
+  city: string;
 
-    @Column()
-    linkedin: string;
+  @Column()
+  state: string;
 
-    @Column()
-    github: string;
+  @Column()
+  zip: string;
 
-    @Column()
-    twitter: string;
+  @Column()
+  country: string;
 
-    @Column()
-    portfolio: string;
+  @Column()
+  linkedin: string;
 
-    @Column()
-    title: string;
+  @Column()
+  github: string;
 
-    @Column()
-    meta: string;
+  @Column()
+  twitter: string;
 
-    @Column()
-    company: string;
+  @Column()
+  portfolio: string;
 
-    @Column()
-    subscribed: boolean;
+  @Column()
+  title: string;
 
-    @Column()
-    onboardingType: string;
-  
-    @CreateDateColumn()
-    createdAt: Date;
-  
-    @UpdateDateColumn()
-    updatedAt: Date;
-  }
-  
+  @Column()
+  meta: string;
+
+  @Column()
+  company: string;
+
+  @Column()
+  subscribed: boolean;
+
+  @Column()
+  onboardingType: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+}
