@@ -4,46 +4,37 @@ import { Repository } from 'typeorm';
 import { Email } from '../entity/email.entity';
 import { EmailSequence } from './email-sequence.entity';
 import * as nodemailer from 'nodemailer';
+import { User } from 'src/entity/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class EmailService {
-  private transporter = nodemailer.createTransport({
-    host: 'smtp.example.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'your-email@example.com',
-      pass: 'your-password',
-    },
-  });
-
+export class UserService {
+  saltOrRounds: number = 10;
   constructor(
-    @InjectRepository(Email)
-    private emailRepository: Repository<Email>,
-    @InjectRepository(EmailSequence)
-    private emailSequenceRepository: Repository<EmailSequence>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
-  async createSequence(
-    sequenceName: string,
-    recipient: string,
-    emails: { subject: string; body: string; daysAfterPrevious: number }[],
+  async hashPassword(password: string): Promise<string> {
+    const hash = await bcrypt.hash(password, this.saltOrRounds);
+    return hash;
+  }
+  async signup(
+    email: string,
+    firstName: string,
+    lastName: string,
+    password: string,
   ) {
-    for (const emailData of emails) {
-      const email = this.emailRepository.create({
-        recipient,
-        subject: emailData.subject,
-        body: emailData.body,
-      });
-      await this.emailRepository.save(email);
+    const encodedPassword = await this.hashPassword(password);
+    const user = this.userRepository.create({
+      email,
+      firstName,
+      lastName,
+      password: encodedPassword,
+      isActive: true,
+    });
 
-      const emailSequence = this.emailSequenceRepository.create({
-        sequenceName,
-        email,
-        daysAfterPrevious: emailData.daysAfterPrevious,
-      });
-      await this.emailSequenceRepository.save(emailSequence);
-    }
+    await this.userRepository.save(user);
   }
 
   async sendScheduledEmails() {

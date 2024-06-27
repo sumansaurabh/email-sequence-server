@@ -3,7 +3,7 @@ import {
   Column,
   Index,
 } from 'typeorm';
-import { BaseDbEntity } from './basedb.entity';
+import { BaseDbEntity } from '../entity/basedb.entity';
 
 @Entity()
 export class User extends BaseDbEntity{

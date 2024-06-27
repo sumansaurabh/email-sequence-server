@@ -4,7 +4,7 @@ import {
   Index,
   Timestamp,
 } from 'typeorm';
-import { BaseDbEntity } from './basedb.entity';
+import { BaseDbEntity } from '../entity/basedb.entity';
 
 @Entity()
 export class Email extends BaseDbEntity {

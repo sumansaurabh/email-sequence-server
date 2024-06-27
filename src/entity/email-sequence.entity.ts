@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Email } from './email.entity';
+import { Email } from '../entity/email.entity';
 
 @Entity()
 export class EmailSequence {

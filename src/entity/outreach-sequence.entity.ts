@@ -16,6 +16,9 @@ import {
     
     @Index()
     @Column()
+    user_id: number;
+
+    @Column()
     client_id: number;
 }
   

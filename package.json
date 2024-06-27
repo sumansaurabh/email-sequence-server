@@ -36,6 +36,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-fastify": "^10.3.9",
     "@nestjs/typeorm": "^10.0.2",
+    "bcrypt": "^5.1.1",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.5",
     "node-cron": "^3.0.3",
