@@ -1,5 +1,5 @@
-# Use an official Node.js runtime as a parent image
-FROM node:14
+# Stage 1: Build the application
+FROM node:lts AS builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application code to the working directory
 COPY . .
@@ -16,8 +16,22 @@ COPY . .
 # Build the TypeScript code
 RUN npm run build
 
+# Stage 2: Run the application
+FROM node:lts-alpine
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy only the necessary files from the build stage
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+
 # Expose the port the app runs on
 EXPOSE 3000
+
+# Set the environment to production
+ENV NODE_ENV={NODE_ENV}
 
 # Define the command to run the app
 CMD ["node", "dist/main.js"]

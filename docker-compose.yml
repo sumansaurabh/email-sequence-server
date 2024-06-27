@@ -2,40 +2,45 @@ version: '3.8'
 
 services:
   postgres:
-      image: postgres:12
-      restart: always
-      environment:
-        POSTGRES_USER: ${POSTGRES_USER}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      ports:
-        - '5432:5432'
-      volumes:
-        - db-data:/var/lib/postgresql/data:cached
-      networks:
-        - email_service_network
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    volumes:
+      - db-data:/var/lib/postgresql/data:cached
+
   pgadmin:
-    container_name: pgadmin4_container
+    container_name: pgadmin4_container_email
     image: dpage/pgadmin4
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_LISTEN_PORT: 80
     ports:
-      - "5050:80"
-    networks:
-      - email_service_network
+      - "${PGADMIN_PORT}:80"
+    depends_on:
+      - postgres
+
   email-service:
     build: .
     ports:
-      - '3000:3000'
+      - '${PORT}:${PORT}'
     environment:
-      DB_HOST: ${DB_HOST}
+      DB_HOST: postgres
       DB_PORT: ${DB_PORT}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_DATABASE: ${DB_DATABASE}
-      WEB_URL: ${WEB_URL}
+      NODE_ENV: ${NODE_ENV}
+    depends_on:
+      - postgres
 
-networks:
-  email_service_network:
-    external: true
+
+volumes:
+  db-data:
+    driver: local
