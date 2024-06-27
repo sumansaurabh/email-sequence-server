@@ -1,6 +1,29 @@
 version: '3.8'
 
 services:
+  postgres:
+      image: postgres:12
+      restart: always
+      environment:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ports:
+        - '5432:5432'
+      volumes:
+        - db-data:/var/lib/postgresql/data:cached
+      networks:
+        - email_service_network
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    networks:
+      - email_service_network
   email-service:
     build: .
     ports:
@@ -12,3 +35,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_DATABASE: ${DB_DATABASE}
       WEB_URL: ${WEB_URL}
+
+networks:
+  email_service_network:
+    external: true
