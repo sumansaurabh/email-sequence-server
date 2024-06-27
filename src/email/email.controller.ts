@@ -6,16 +6,16 @@ import { Response } from 'express';
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
-  @Post('send')
+  @Post('register')
   async sendEmail(
     @Body() body: { recipient: string; subject: string; content: string },
   ) {
     await this.emailService.sendEmail(
-      body.recipient,
-      body.subject,
-      body.content,
+      body
     );
   }
+
+
 
   @Get('track/:id')
   async trackEmail(@Param('id') id: string, @Res() res: Response) {

@@ -1,15 +1,13 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
+  Index,
+  Timestamp,
 } from 'typeorm';
+import { BaseDbEntity } from './basedb.entity';
 
 @Entity()
-export class Email {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class Email extends BaseDbEntity {
 
   @Column()
   recipient: string;
@@ -18,23 +16,28 @@ export class Email {
   subject: string;
 
   @Column()
-  body: string;
+  sender: string;
 
   @Column({ default: false })
   delivered: boolean;
 
-  @Column({ nullable: true })
-  deliveryStatus: string;
-
   @Column({ default: false })
   opened: boolean;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @Column({ default: false })
+  clicked: boolean;
 
   @Column({ nullable: true })
   domainName: string;
+
+  @Column({ nullable: true })
+  ipAddress: string;
+
+  @Column({ nullable: true })
+  @Index()
+  executionTime: Timestamp;
+
+  @Column({ nullable: true })
+  @Index()
+  serviceUsed: string;
 }

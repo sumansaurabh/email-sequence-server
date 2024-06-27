@@ -1,78 +1,50 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-} from 'typeorm';
-import { BaseDbEntity } from './basedb.entity';
+    Entity,
+    Column,
+    Index,
+  } from 'typeorm';
+  import { BaseDbEntity } from './basedb.entity';
+  
+  @Entity()
+  export class User extends BaseDbEntity{
+  
+    @Index({ unique: true })
+    email: string;
+    
+    @Column()
+    password: string;
 
-@Entity()
-export class User extends BaseDbEntity{
-  @PrimaryGeneratedColumn()
-  id: number;
+    @Column({ nullable: true})
+    firstName: string;
+  
+    @Column({ nullable: true})
+    lastName: string;
+  
+    @Column({ nullable: true})
+    dob: Date;
+  
+    @Column({ nullable: true})
+    phone: string;
+  
+    @Column("simple-json", { nullable: true})
+    address: { street: string, city: string, state: string };
+  
+    @Column({ nullable: true})
+    zip: string;
+  
+    @Column({ nullable: true})
+    country: string;
 
-  @Index({ unique: true })
-  email: string;
+    @Column({ nullable: true})
+    googleSignIn: string;
 
-  @Column()
-  firstName: string;
+    @Column({ nullable: true})
+    linkedSignIn: string;
 
-  @Column()
-  lastName: string;
+    @Column({ nullable: true})
+    signupType: string;
 
-  @Column()
-  dob: Date;
-
-  @Column()
-  phone: string;
-
-  @Column()
-  address: string;
-
-  @Column()
-  city: string;
-
-  @Column()
-  state: string;
-
-  @Column()
-  zip: string;
-
-  @Column()
-  country: string;
-
-  @Column()
-  linkedin: string;
-
-  @Column()
-  github: string;
-
-  @Column()
-  twitter: string;
-
-  @Column()
-  portfolio: string;
-
-  @Column()
-  title: string;
-
-  @Column()
-  meta: string;
-
-  @Column()
-  company: string;
-
-  @Column()
-  subscribed: boolean;
-
-  @Column()
-  onboardingType: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+    @Index()
+    @Column()
+    isActive: boolean;
 }
