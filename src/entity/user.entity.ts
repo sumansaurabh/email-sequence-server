@@ -1,14 +1,24 @@
 import { Entity, Column, Index } from 'typeorm';
 import { BaseDbEntity } from '../entity/basedb.entity';
+import { IsEmail } from 'class-validator';
+
 
 export enum UserRole {
     ADMIN = 'admin',
     VIEWER = 'viewer',
 }
 
+export enum SignupType {
+    GOOGLE = 'google',
+    EMAIL = 'email',
+    LINKEDIN = 'linkedIn',
+}
+
 @Entity()
 export class User extends BaseDbEntity {
+
     @Index({ unique: true })
+    @IsEmail()
     email: string;
 
     @Column()
@@ -41,8 +51,12 @@ export class User extends BaseDbEntity {
     @Column({ nullable: true })
     linkedSignIn: string;
 
-    @Column({ nullable: true })
-    signupType: string;
+    @Column({
+        type: 'enum',
+        enum: SignupType,
+        default: SignupType.EMAIL,
+    })
+    signupType: SignupType;
 
     @Index()
     @Column()
