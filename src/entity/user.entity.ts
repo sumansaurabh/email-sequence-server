@@ -15,6 +15,7 @@ export enum SignupType {
 }
 
 @Entity()
+@Index(['email'], { unique: true })  // Ensure the index is correctly defined
 export class User extends BaseDbEntity {
 
     @Index({ unique: true })

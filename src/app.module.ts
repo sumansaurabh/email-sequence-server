@@ -22,7 +22,7 @@ import { UserModule } from './users/user.module';
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true,
       }),
-      inject: [ConfigService],
+      inject: [ConfigService], 
     }),
     AuthModule,
     UserModule,

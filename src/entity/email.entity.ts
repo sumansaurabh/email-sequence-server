@@ -33,8 +33,8 @@ export class Email extends BaseDbEntity {
   @Column({ nullable: true })
   ipAddress: string;
 
-  @Column({ nullable: true })
   @Index()
+  @Column('timestamp')
   executionTime: Timestamp;
 
   @Column({ nullable: true })
