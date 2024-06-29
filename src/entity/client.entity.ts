@@ -4,12 +4,14 @@ import {
   Index,
 } from 'typeorm';
 import { BaseDbEntity } from '../entity/basedb.entity';
+import { IsEmail } from 'class-validator';
 
 @Entity()
 export class Client extends BaseDbEntity{
-
-  @Column()
+  
   @Index({ unique: true })
+  @IsEmail()
+  @Column()
   email: string;
 
   @Column({ nullable: true})

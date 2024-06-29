@@ -57,6 +57,5 @@ export class Email extends BaseDbEntity {
   stage: number;
 
   @ManyToOne(() => OutReach)
-  @Column()
   outreach: OutReach;
 }
