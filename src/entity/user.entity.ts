@@ -4,8 +4,8 @@ import { IsEmail } from 'class-validator';
 
 
 export enum UserRole {
-    ADMIN = 'admin',
-    VIEWER = 'viewer',
+    ADMIN = 'ADMIN',
+    VIEWER = 'VIEWER',
 }
 
 export enum SignupType {
