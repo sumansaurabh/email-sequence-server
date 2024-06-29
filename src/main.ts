@@ -17,7 +17,7 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
   app.enableCors();
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('api');
 
   

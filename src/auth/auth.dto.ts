@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
     IsEmail,
     IsEnum,
@@ -56,12 +57,15 @@ export class CreateUserDto {
     linkedSignIn?: string;
 
     @IsEnum(SignupType)
+    @Transform(({ value }) => value ?? SignupType.EMAIL)
     signupType: SignupType = SignupType.EMAIL;
 
     @IsBoolean()
+    @Transform(({ value }) => value ?? true)
     isActive: boolean = true;
 
     @IsEnum(UserRole)
+    @Transform(({ value }) => value ?? UserRole.VIEWER)
     role: UserRole = UserRole.VIEWER;
 }
 
