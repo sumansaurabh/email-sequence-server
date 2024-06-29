@@ -22,7 +22,6 @@ export class UserService {
   async signup(createUserDto: CreateUserDto): Promise<User> {
     const encodedPassword = await this.hashPassword(createUserDto.password);
     createUserDto.password = encodedPassword;
-    console.log(createUserDto); 
     const newUser = this.userRepository.create(createUserDto);
     return await this.userRepository.save(newUser);
   }

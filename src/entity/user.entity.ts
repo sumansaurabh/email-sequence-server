@@ -1,6 +1,7 @@
 import { Entity, Column, Index } from 'typeorm';
 import { BaseDbEntity } from './basedb.entity';
 import { IsEmail } from 'class-validator';
+import { Exclude } from 'class-transformer';
 
 
 export enum UserRole {
@@ -23,6 +24,7 @@ export class User extends BaseDbEntity {
     email: string;
 
     @Column()
+    @Exclude({ toPlainOnly: true })
     password: string;
 
     @Column({ nullable: true })

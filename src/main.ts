@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import 'reflect-metadata';
 import {
@@ -8,7 +8,7 @@ import {
 // import { setupEmailScheduler } from './scheduler';
 // import { EmailService } from './email/email.service';
 import { ConfigService } from './config/configuration';
-import { ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const configService = new ConfigService();
@@ -18,6 +18,7 @@ async function bootstrap() {
   );
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.setGlobalPrefix('api');
 
   
