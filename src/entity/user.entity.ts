@@ -1,5 +1,5 @@
 import { Entity, Column, Index } from 'typeorm';
-import { BaseDbEntity } from '../entity/basedb.entity';
+import { BaseDbEntity } from './basedb.entity';
 import { IsEmail } from 'class-validator';
 
 
@@ -15,11 +15,11 @@ export enum SignupType {
 }
 
 @Entity()
-@Index(['email'], { unique: true })  // Ensure the index is correctly defined
 export class User extends BaseDbEntity {
 
     @Index({ unique: true })
     @IsEmail()
+    @Column()
     email: string;
 
     @Column()

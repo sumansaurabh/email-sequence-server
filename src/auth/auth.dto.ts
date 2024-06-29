@@ -1,180 +1,180 @@
-import {
-    IsEmail,
-    IsEnum,
-    IsOptional,
-    IsString,
-    IsDateString,
-    IsBoolean,
-    IsNumber,
-} from 'class-validator';
-import { SignupType, UserRole } from 'src/entity/user.entity';
+// import {
+//     IsEmail,
+//     IsEnum,
+//     IsOptional,
+//     IsString,
+//     IsDateString,
+//     IsBoolean,
+//     IsNumber,
+// } from 'class-validator';
+// import { SignupType, UserRole } from 'src/entity/user.entity';
 
-export class CreateUserDto {
-    @IsEmail()
-    email: string;
+// export class CreateUserDto {
+//     @IsEmail()
+//     email: string;
 
-    @IsString()
-    password: string;
+//     @IsString()
+//     password: string;
 
-    @IsOptional()
-    @IsString()
-    firstName?: string;
+//     @IsOptional()
+//     @IsString()
+//     firstName?: string;
 
-    @IsOptional()
-    @IsString()
-    lastName?: string;
+//     @IsOptional()
+//     @IsString()
+//     lastName?: string;
 
-    @IsOptional()
-    @IsDateString()
-    dob?: Date;
+//     @IsOptional()
+//     @IsDateString()
+//     dob?: Date;
 
-    @IsOptional()
-    @IsString()
-    phone?: string;
+//     @IsOptional()
+//     @IsString()
+//     phone?: string;
 
-    @IsOptional()
-    address?: {
-        street: string;
-        city: string;
-        state: string;
-    };
+//     @IsOptional()
+//     address?: {
+//         street: string;
+//         city: string;
+//         state: string;
+//     };
 
-    @IsOptional()
-    @IsString()
-    zip?: string;
+//     @IsOptional()
+//     @IsString()
+//     zip?: string;
 
-    @IsOptional()
-    @IsString()
-    country?: string;
+//     @IsOptional()
+//     @IsString()
+//     country?: string;
 
-    @IsOptional()
-    @IsString()
-    googleSignIn?: string;
+//     @IsOptional()
+//     @IsString()
+//     googleSignIn?: string;
 
-    @IsOptional()
-    @IsString()
-    linkedSignIn?: string;
+//     @IsOptional()
+//     @IsString()
+//     linkedSignIn?: string;
 
-    @IsEnum(SignupType)
-    signupType: SignupType;
+//     @IsEnum(SignupType)
+//     signupType: SignupType;
 
-    @IsBoolean()
-    isActive: boolean;
+//     @IsBoolean()
+//     isActive: boolean;
 
-    @IsEnum(UserRole)
-    role: UserRole;
-}
+//     @IsEnum(UserRole)
+//     role: UserRole;
+// }
 
-export class UpdateUserDto {
-    @IsOptional()
-    @IsEmail()
-    email?: string;
+// export class UpdateUserDto {
+//     @IsOptional()
+//     @IsEmail()
+//     email?: string;
 
-    @IsOptional()
-    @IsString()
-    password?: string;
+//     @IsOptional()
+//     @IsString()
+//     password?: string;
 
-    @IsOptional()
-    @IsString()
-    firstName?: string;
+//     @IsOptional()
+//     @IsString()
+//     firstName?: string;
 
-    @IsOptional()
-    @IsString()
-    lastName?: string;
+//     @IsOptional()
+//     @IsString()
+//     lastName?: string;
 
-    @IsOptional()
-    @IsDateString()
-    dob?: Date;
+//     @IsOptional()
+//     @IsDateString()
+//     dob?: Date;
 
-    @IsOptional()
-    @IsString()
-    phone?: string;
+//     @IsOptional()
+//     @IsString()
+//     phone?: string;
 
-    @IsOptional()
-    address?: {
-        street: string;
-        city: string;
-        state: string;
-    };
+//     @IsOptional()
+//     address?: {
+//         street: string;
+//         city: string;
+//         state: string;
+//     };
 
-    @IsOptional()
-    @IsString()
-    zip?: string;
+//     @IsOptional()
+//     @IsString()
+//     zip?: string;
 
-    @IsOptional()
-    @IsString()
-    country?: string;
+//     @IsOptional()
+//     @IsString()
+//     country?: string;
 
-    @IsOptional()
-    @IsString()
-    googleSignIn?: string;
+//     @IsOptional()
+//     @IsString()
+//     googleSignIn?: string;
 
-    @IsOptional()
-    @IsString()
-    linkedSignIn?: string;
+//     @IsOptional()
+//     @IsString()
+//     linkedSignIn?: string;
 
-    @IsOptional()
-    @IsEnum(SignupType)
-    signupType?: SignupType;
+//     @IsOptional()
+//     @IsEnum(SignupType)
+//     signupType?: SignupType;
 
-    @IsOptional()
-    @IsBoolean()
-    isActive?: boolean;
+//     @IsOptional()
+//     @IsBoolean()
+//     isActive?: boolean;
 
-    @IsOptional()
-    @IsEnum(UserRole)
-    role?: UserRole;
-}
+//     @IsOptional()
+//     @IsEnum(UserRole)
+//     role?: UserRole;
+// }
 
-export class UserDto {
-  id: number; // assuming id is of type number
+// export class UserDto {
+//   id: number; // assuming id is of type number
 
-  email: string;
+//   email: string;
 
-  firstName?: string;
+//   firstName?: string;
 
-  lastName?: string;
+//   lastName?: string;
 
-  dob?: Date;
+//   dob?: Date;
 
-  phone?: string;
+//   phone?: string;
 
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-  };
+//   address?: {
+//     street: string;
+//     city: string;
+//     state: string;
+//   };
 
-  zip?: string;
+//   zip?: string;
 
-  country?: string;
+//   country?: string;
 
-  googleSignIn?: string;
+//   googleSignIn?: string;
 
-  linkedSignIn?: string;
+//   linkedSignIn?: string;
 
-  signupType: SignupType;
+//   signupType: SignupType;
 
-  isActive: boolean;
+//   isActive: boolean;
 
-  role: UserRole;
+//   role: UserRole;
 
-  createdAt: Date; // assuming BaseDbEntity has createdAt and updatedAt fields
-  updatedAt: Date;
-}
+//   createdAt: Date; // assuming BaseDbEntity has createdAt and updatedAt fields
+//   updatedAt: Date;
+// }
 
-export class LoginUserDto {
-  @IsEmail()
-  email: string;
+// export class LoginUserDto {
+//   @IsEmail()
+//   email: string;
 
-  @IsString()
-  password: string;
-}
+//   @IsString()
+//   password: string;
+// }
 
-export class JwtPayloadDto {
-  @IsString()
-  username: string;
+// export class JwtPayloadDto {
+//   @IsString()
+//   username: string;
 
-  @IsNumber()
-  sub: number;
-}
+//   @IsNumber()
+//   sub: number;
+// }

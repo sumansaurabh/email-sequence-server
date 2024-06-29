@@ -3,14 +3,18 @@ import {
   Column,
   Index,
   Timestamp,
+  ManyToOne,
+  OneToOne,
 } from 'typeorm';
 import { BaseDbEntity } from '../entity/basedb.entity';
+import { OutReach } from './outreach.entity';
+import { Client } from './client.entity';
 
 @Entity()
 export class Email extends BaseDbEntity {
 
-  @Column()
-  recipient: string;
+  @OneToOne(() => Client)
+  client: Client;
 
   @Column()
   subject: string;
@@ -18,16 +22,24 @@ export class Email extends BaseDbEntity {
   @Column()
   sender: string;
 
+  @Column()
+  @Index()
+  sent: boolean;
+
   @Column({ default: false })
+  @Index()
   delivered: boolean;
 
   @Column({ default: false })
+  @Index()
   opened: boolean;
 
   @Column({ default: false })
+  @Index()
   clicked: boolean;
 
   @Column({ nullable: true })
+  @Index()
   domainName: string;
 
   @Column({ nullable: true })
@@ -40,4 +52,11 @@ export class Email extends BaseDbEntity {
   @Column({ nullable: true })
   @Index()
   serviceUsed: string;
+
+  @Column({ nullable: true })
+  stage: number;
+
+  @ManyToOne(() => OutReach)
+  @Column()
+  outreach: OutReach;
 }

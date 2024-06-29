@@ -6,8 +6,9 @@ import {
 import { BaseDbEntity } from '../entity/basedb.entity';
 
 @Entity()
-export class User extends BaseDbEntity{
+export class Client extends BaseDbEntity{
 
+  @Column()
   @Index({ unique: true })
   email: string;
 

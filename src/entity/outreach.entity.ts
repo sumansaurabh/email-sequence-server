@@ -4,12 +4,10 @@ import {
     Column,
     Index,
   } from 'typeorm';
+import { BaseDbEntity } from './basedb.entity';
   
   @Entity()
-  export class OutReachSequence {
-    @PrimaryGeneratedColumn()
-    id: number;
-    
+  export class OutReach extends BaseDbEntity{
     @Index()
     @Column()
     name: string;
@@ -20,5 +18,8 @@ import {
 
     @Column()
     client_id: number;
+
+    @Column()
+    numberOfDays: number;
 }
   
