@@ -8,6 +8,7 @@ import {
 // import { setupEmailScheduler } from './scheduler';
 // import { EmailService } from './email/email.service';
 import { ConfigService } from './config/configuration';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const configService = new ConfigService();
@@ -15,11 +16,16 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+  app.enableCors();
+  app.useGlobalPipes(new ValidationPipe());
+  app.setGlobalPrefix('api');
+
+  
 
   // const emailService = app.get(EmailService);
   // setupEmailScheduler(emailService);
   const port = configService.get('PORT') || 3000;
-
-  await app.listen(port);
+  console.log("PORT: ", port)
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();

@@ -40,6 +40,8 @@ services:
       NODE_ENV: ${NODE_ENV}
     depends_on:
       - postgres
+    volumes:
+      - .:/app:delegated
 
 
 volumes:

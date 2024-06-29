@@ -35,7 +35,7 @@ RUN npm ci --only=production
 EXPOSE ${PORT:-3000}
 
 # Set the environment to production
-ENV NODE_ENV=development
+# ENV NODE_ENV=development
 
 # Define the command to run the app
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:dev"]
