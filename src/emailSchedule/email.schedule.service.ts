@@ -9,10 +9,12 @@ import { Outreach } from 'src/entity/outreach.entity';
 import { UserService } from 'src/users/user.service';
 import { OutreachService } from 'src/outreach/outreach.service';
 import { MailBoxService } from 'src/mailbox/mailbox.service';
-import { ScheduledEmail } from 'src/entity/scheduled.email.entity';
+import { Email } from 'src/entity/email.entity';
 import { ClientService } from 'src/client/client.service';
 import { v4 as uuidv4 } from 'uuid';
 import { MailBox } from 'src/entity/mailbox.entity';
+import { log } from 'console';
+import { UrlShortener } from 'src/entity/url.shortner';
 
 
 @Injectable()
@@ -24,8 +26,10 @@ export class EmailScheduleService {
         private outreachService: OutreachService,
         private clientService: ClientService,
         private mailboxService: MailBoxService,
-        @InjectRepository(ScheduledEmail)
-        private seRepository: Repository<ScheduledEmail>,
+        @InjectRepository(Email)
+        private seRepository: Repository<Email>,
+        @InjectRepository(UrlShortener)
+        private usRepository: Repository<UrlShortener>,
     ) {}
 
     
@@ -41,12 +45,16 @@ export class EmailScheduleService {
         return min;
     }
 
-    scheduledEmailTs(mailbox: MailBox): number {
+    get10MinuteCeiling() {
         const now = new Date();
         const minutes = now.getMinutes();
         const next10MinuteCeiling = Math.ceil((minutes + 1) / 10) * 10;
         now.setMinutes(next10MinuteCeiling, 0, 0); // Set minutes to the next 10-minute ceiling, seconds and milliseconds to zero
-        
+        return now; // Return the timestamp in milliseconds
+    }
+
+    scheduledEmailTs(mailbox: MailBox): number {
+        const now = this.get10MinuteCeiling();
         // Calculate the time taken to deliver all emails
         const emailsToDeliver = mailbox.scheduledCount; // e.g., 150
         const mailsPer10Minutes = mailbox.mailsPer10Mins; // e.g., 3
@@ -64,7 +72,7 @@ export class EmailScheduleService {
     }
     
 
-    async add(userId: number, outreachId: number, clientId: number): Promise<ScheduledEmail> {
+    async add(userId: number, outreachId: number, clientId: number): Promise<Email> {
         const outreach = await this.outreachService.findById(outreachId);
         if (!outreach) {
             throw new BadRequestException('Outreach not found');
@@ -77,7 +85,7 @@ export class EmailScheduleService {
         if (!client) {
             throw new BadRequestException('Client not found');
         }
-        const se = new ScheduledEmail();
+        const se = new Email();
         se.userId = userId;
         se.outreach = outreach;
         se.client = client;
@@ -91,11 +99,55 @@ export class EmailScheduleService {
         return response;
     }
 
-    async findAll(): Promise<ScheduledEmail[]> {
+    async findAll(): Promise<Email[]> {
         return await this.seRepository.find();
     }
 
-    async findByUserId(userId: number): Promise<ScheduledEmail[]> {
+    async findByUserId(userId: number): Promise<Email[]> {
         return await this.seRepository.find({ where: { userId: userId } });
+    }
+
+    async fetchScheduledEmails(): Promise<Email[]> {
+        const nowTs = `${this.get10MinuteCeiling().getTime()}`;
+        return await this.seRepository.find({ where: { scheduled10minInterval: nowTs } });
+    }
+
+    async update(se: Email): Promise<Email> {
+        return await this.seRepository.save(se);
+    }
+
+    async updateEmailOpened(id: number): Promise<Email> {
+        const email = await this.seRepository.findOne({ where: { id: id } });
+        if (!email) {
+            console.error(`Email with ID ${id} not found in the tracking system`);
+        }
+        email.opened = true;
+        await this.update(email);
+        return email;
+    }
+
+    async updateEmailUrlClicked(id: number, url: string): Promise<Email> {
+        if(!id) {
+            return;
+        }
+        const email = await this.seRepository.findOne({ where: { id: id } });
+        if (!email) {
+            console.error(`Email with ID ${id} not found in the tracking system`);
+        }
+
+        email.clicked = [{url: url, clickedAt: new Date()}]
+        await this.update(email);
+        return email;
+    }
+
+    async updateUrlOpened(id: number, eid: number): Promise<string> {
+        const urlShortner = await this.usRepository.findOne({ where: { id: id } });
+        if (!urlShortner) {
+            const defaultUrl = "https://www.penify.dev";
+            this.updateEmailUrlClicked(eid, defaultUrl);
+            return "https://www.penify.dev"
+        }
+        this.updateEmailUrlClicked(eid, urlShortner.url);
+        return urlShortner.url;
     }
 }

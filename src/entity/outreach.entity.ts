@@ -2,11 +2,17 @@ import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, JoinColumn } 
 import { BaseDbEntity } from './basedb.entity';
 import { User } from './user.entity';
 import { Exclude } from 'class-transformer';
+import { IsNotEmpty } from 'class-validator';
 
 export class State {
     name: string;
-    scheduleAfterDays: number;
+
+    @IsNotEmpty()
+    scheduleAfterDays: number = 2;
+
     description: string;
+
+    @IsNotEmpty()
     templateId: string;
 }
 
@@ -23,4 +29,7 @@ export class Outreach extends BaseDbEntity {
 
     @Column('simple-json', { nullable: true })
     stateList: State[];
+
+    @IsNotEmpty()
+    subject: string;
 }

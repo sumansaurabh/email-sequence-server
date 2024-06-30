@@ -1,61 +1,83 @@
-import {
-  Entity,
-  Column,
-  Index,
-  Timestamp,
-  ManyToOne,
-  OneToOne,
-} from 'typeorm';
-import { BaseDbEntity } from '../entity/basedb.entity';
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, In, Unique } from 'typeorm';
+import { BaseDbEntity } from './basedb.entity';
 import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
+import { MailBox } from './mailbox.entity';
+import { IsNotEmpty } from 'class-validator';
+
+export enum ScheduledEmailState {
+    SCHEDULE = 'SCHEDULE',
+    SENT = 'SENT',
+    FAILED = 'FAILED',
+}
+
+enum Priority {
+    HIGH = 'HIGH',
+    MEDIUM = 'MEDIUM',
+    LOW = 'LOW',
+}
+
+class ClickedUrl {
+    url: string;
+    clickedAt: Date;
+}
 
 @Entity()
+@Unique(['userId', 'client', 'outreach', 'outreachStateId'])
 export class Email extends BaseDbEntity {
 
-  @OneToOne(() => Client)
-  client: Client;
+    @Index()
+    @Column()
+    userId: number;
 
-  @Column()
-  subject: string;
+    @Index()
+    @Column()
+    taskName: string;
 
-  @Column()
-  sender: string;
+    @Column({
+        type: 'enum',
+        enum: ScheduledEmailState,
+        default: ScheduledEmailState.SCHEDULE,
+    })
+    @Index()
+    state: ScheduledEmailState;
 
-  @Column()
-  @Index()
-  sent: boolean;
+    @ManyToOne(() => Client)
+    client: Client;
 
-  @Column({ default: false })
-  @Index()
-  delivered: boolean;
+    @ManyToOne(() => Outreach)
+    outreach: Outreach;
 
-  @Column({ default: false })
-  @Index()
-  opened: boolean;
+    @Column()
+    outreachStateId: number;
 
-  @Column({ default: false })
-  @Index()
-  clicked: boolean;
+    @ManyToOne(() => MailBox)
+    mailbox: MailBox;
 
-  @Column({ nullable: true })
-  @Index()
-  domainName: string;
+    @Column()
+    @Index()
+    scheduled10minInterval: string;
 
-  @Column({ nullable: true })
-  ipAddress: string;
+    @Column({
+        type: 'enum',
+        enum: Priority,
+        default: Priority.MEDIUM,
+    })
+    @Index()
+    @IsNotEmpty()
+    priority: Priority
 
-  @Index()
-  @Column('timestamp')
-  executionTime: Timestamp;
+    @Column({ default: false })
+    @Index()
+    delivered: boolean;
 
-  @Column({ nullable: true })
-  @Index()
-  serviceUsed: string;
+    @Column()
+    deliveryStatus: boolean;
 
-  @Column({ nullable: true })
-  stage: number;
+    @Column({ default: false })
+    @Index()
+    opened: boolean;
 
-  @ManyToOne(() => Outreach)
-  outreach: Outreach;
+    @Column('simple-json', { nullable: true })
+    clicked: ClickedUrl[];
 }

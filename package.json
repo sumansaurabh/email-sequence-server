@@ -46,6 +46,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "fastify": "^4.28.0",
+    "handlebars": "^4.7.8",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.5",
     "node-cron": "^3.0.3",

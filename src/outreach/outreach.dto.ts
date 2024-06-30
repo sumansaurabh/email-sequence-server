@@ -17,4 +17,7 @@ export class OutreachDto {
     @Type(() => State)
     @ArrayNotEmpty()
     stateList: State[];
+
+    @IsNotEmpty()
+    subject: string;
 }

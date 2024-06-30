@@ -1,4 +1,15 @@
-import { Controller, Get, Request, Post, Body, Param, ParseIntPipe, UseGuards, BadRequestException, Put } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Request,
+    Post,
+    Body,
+    Param,
+    ParseIntPipe,
+    UseGuards,
+    BadRequestException,
+    Put,
+} from '@nestjs/common';
 import { OutreachService } from './outreach.service';
 import { OutreachDto } from './outreach.dto';
 import { Unique } from 'typeorm';
@@ -6,21 +17,32 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roels.guard';
 import { UserRole } from 'src/entity/user.entity';
 import { Roles } from 'src/auth/roles.decorator';
+import { Email } from 'src/entity/email.entity';
+import { EmailScheduleService } from 'src/emailSchedule/email.schedule.service';
 
 @Controller('outreach')
 export class OutreachController {
-    constructor(private readonly outreachService: OutreachService) {}
+    constructor(
+        private readonly outreachService: OutreachService,
+        private emailScheduleService: EmailScheduleService,
+    ) {}
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    async create(@Request() req, @Body() outreachDto: OutreachDto): Promise<OutreachDto> {
+    async create(
+        @Request() req,
+        @Body() outreachDto: OutreachDto,
+    ): Promise<OutreachDto> {
         outreachDto.userId = req.user.id;
         return this.outreachService.add(outreachDto);
     }
 
     @Put()
     @UseGuards(JwtAuthGuard)
-    async put(@Request() req, @Body() outreachDto: OutreachDto): Promise<OutreachDto> {
+    async put(
+        @Request() req,
+        @Body() outreachDto: OutreachDto,
+    ): Promise<OutreachDto> {
         outreachDto.userId = req.user.id;
         return this.outreachService.update(outreachDto);
     }
@@ -39,10 +61,18 @@ export class OutreachController {
         return this.outreachService.findByUserId(userId);
     }
 
-    @Get('add/client/:id')
+    @Post('add/client/:clientId/outreach/:outreachId')
     @UseGuards(JwtAuthGuard)
-    async addClient(@Request() req, @Param('id') id: number ): Promise<OutreachDto[]> {
+    async addClient(
+        @Request() req,
+        @Param('clientId') clientId: number,
+        @Param('outreachId') outreachId: number,
+    ): Promise<Email> {
         const userId = req.user.id;
-        return this.outreachService.findByUserId(userId);
+        return await this.emailScheduleService.add(
+            userId,
+            outreachId,
+            clientId,
+        );
     }
 }

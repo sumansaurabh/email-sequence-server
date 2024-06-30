@@ -1,105 +1,137 @@
-// import { Injectable } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Repository } from 'typeorm';
-// import { Email } from '../entity/email.entity';
-// import * as nodemailer from 'nodemailer';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as nodemailer from 'nodemailer';
+import { EmailScheduleService } from 'src/emailSchedule/email.schedule.service';
+import {
+    Email,
+    ScheduledEmailState,
+} from 'src/entity/email.entity';
+import { v4 as uuidv4 } from 'uuid';
 
-// @Injectable()
-// export class EmailService {
-//   private transporter = nodemailer.createTransport({
-//     host: 'smtp.example.com',
-//     port: 587,
-//     secure: false,
-//     auth: {
-//       user: 'your-email@example.com',
-//       pass: 'your-password',
-//     },
-//   });
 
-//   constructor(
-//     @InjectRepository(Email)
-//     private emailRepository: Repository<Email>,
-//     @InjectRepository(EmailSequence)
-//     private emailSequenceRepository: Repository<EmailSequence>,
-//   ) {}
+import * as fs from 'fs';
+import * as Handlebars from 'handlebars';
+import * as path from 'path';
+import { Client } from 'src/entity/client.entity';
+import { UrlShortener } from 'src/entity/url.shortner';
 
-//   async createSequence(
-//     sequenceName: string,
-//     recipient: string,
-//     emails: { subject: string; body: string; daysAfterPrevious: number }[],
-//   ) {
-//     for (const emailData of emails) {
-//       const email = this.emailRepository.create({
-//         recipient,
-//         subject: emailData.subject,
-//         body: emailData.body,
-//       });
-//       await this.emailRepository.save(email);
+@Injectable()
+export class EmailService {
 
-//       const emailSequence = this.emailSequenceRepository.create({
-//         sequenceName,
-//         email,
-//         daysAfterPrevious: emailData.daysAfterPrevious,
-//       });
-//       await this.emailSequenceRepository.save(emailSequence);
-//     }
-//   }
+    constructor(
+        @InjectRepository(Email)
+        private emailRepository: Repository<Email>,
+        @InjectRepository(UrlShortener)
+        private urlShortnerRepository: Repository<UrlShortener>,
+        private emailScheduleService: EmailScheduleService,
+    ) {}
 
-//   async sendScheduledEmails() {
-//     const sequences = await this.emailSequenceRepository.find({
-//       where: { sent: false },
-//       relations: ['email'],
-//     });
+    async sendScheduledEmails() {
+        const scheduledEmailList: Email[] =
+            await this.emailScheduleService.fetchScheduledEmails();
 
-//     for (const sequence of sequences) {
-//       const shouldSendEmail = this.shouldSendEmail(sequence);
-//       if (shouldSendEmail) {
-//         await this.sendEmail(sequence.email);
-//         sequence.sent = true;
-//         await this.emailSequenceRepository.save(sequence);
-//       }
-//     }
-//   }
+        let processed = 0;
+        for (const se of scheduledEmailList) {
+            try {
+                const shouldSendEmail = this.shouldSendEmail(se);
+                processed++;
+                if (!shouldSendEmail) {
+                    continue;
+                }
+                await this.sendEmail(se);
+            } catch (error) {
+                console.error(`Error sending email: ${error.message}`);
+                se.state = ScheduledEmailState.FAILED;
+            }
+            await this.emailScheduleService.update(se);
+        }
+    }
 
-//   private shouldSendEmail(sequence: EmailSequence): boolean {
-//     const previousEmailDate = new Date(sequence.createdAt);
-//     const sendDate = new Date(
-//       previousEmailDate.getTime() +
-//         sequence.daysAfterPrevious * 24 * 60 * 60 * 1000,
-//     );
-//     return new Date() >= sendDate;
-//   }
+    private shouldSendEmail(se: Email): boolean {
+        if (se.state === ScheduledEmailState.SENT) {
+            return false;
+        }
+        return se.client.subscribed;
+    }
 
-//   async sendEmail(email: Email) {
-//     const trackingPixel = `<img src="${process.env.WEB_URL}/email/track/${email.id}" style="display:none;" />`;
-//     const emailBodyWithTracking = `${email.body}<br>${trackingPixel}<br><a href="${process.env.WEB_URL}/email/unsubscribe?email=${email.recipient}">Unsubscribe</a>`;
+    renderEmailTemplate(templateName: string, data: Client): string {
+        const filePath = path.join(__dirname, '..', 'templates', `${templateName}.html`);
+        const source = fs.readFileSync(filePath, 'utf8');
+        const template = Handlebars.compile(source);
+        return template(data);
+    }
 
-//     try {
-//       const info = await this.transporter.sendMail({
-//         from: '"Your Name" <your-email@example.com>',
-//         to: email.recipient,
-//         subject: email.subject,
-//         html: emailBodyWithTracking,
-//       });
-//       email.delivered = true;
-//       email.deliveryStatus = info.response;
-//     } catch (error) {
-//       email.delivered = false;
-//       email.deliveryStatus = error.message;
-//     }
+    async fetchShortUrl(url: string, clientId: number, userId: number, emailGuid: string): Promise<string> {
+        const urlShortener: UrlShortener = await this.urlShortnerRepository.findOne({ where: { url: url } });
+        let shortenUrl = "";
+        if (urlShortener) {
+            shortenUrl = `${process.env.WEB_URL}/${urlShortener.id}`;   
+        } else {
+            const newUrlShortener = await this.urlShortnerRepository.create({ url: url });
+            shortenUrl = `${process.env.WEB_URL}/${newUrlShortener.id}`;
+        }
+        return `${shortenUrl}?cid=${clientId}&uid=${userId}&gid=${emailGuid}`;
+    }
 
-//     await this.emailRepository.save(email);
-//   }
+    async replaceUrlsWithShortenedUrls(content: string, clientId: number, userId: number, emailGuid: string): Promise<string> {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const urls = content.match(urlRegex);
+        if (!urls) {
+            return content;
+        }
+        const replacements = await Promise.all(
+            urls.map(async (url) => {
+                const shortUrl = await this.fetchShortUrl(url, clientId, userId, emailGuid);
+                return { url, shortUrl };
+            })
+        );
+        let modifiedContent = content;
+        replacements.forEach(({ url, shortUrl }) => {
+            modifiedContent = modifiedContent.replace(url, shortUrl);
+        });
+        return modifiedContent;
+    }
 
-//   async trackEmail(id: number): Promise<void> {
-//     const email = await this.emailRepository.findOne(id);
-//     if (email) {
-//       email.opened = true;
-//       await this.emailRepository.save(email);
-//     }
-//   }
+    smtpClient(se: Email): nodemailer.Transporter{
+        const smtpConfig = se.mailbox.smtpConfig;
+        const transporter = nodemailer.createTransport({
+            host: smtpConfig.host,
+            port: smtpConfig.port,
+            secure: false,
+            auth: {
+                user: smtpConfig.auth.user,
+                pass: smtpConfig.auth.pass,
+            },
+        });
+        return transporter;
+    }
 
-//   async unsubscribe(email: string): Promise<void> {
-//     // Implement your unsubscribe logic here
-//   }
-// }
+    async sendEmail(se: Email) {
+        const emailTemplate = se.outreach.stateList[se.outreachStateId].templateId;
+        const client = se.client;
+        const mailbox = se.mailbox;
+        const sender = mailbox.emailId;
+        const senderName = mailbox.name;
+        const guid: string = uuidv4();
+        let emailContent = this.renderEmailTemplate(emailTemplate, client);
+        emailContent = await this.replaceUrlsWithShortenedUrls(emailContent, client.id, se.userId, guid);
+        emailContent += `<img src="${process.env.WEB_URL}/email/track/${guid}" style="display:none;" />`;
+
+        try {
+            const info = await this.smtpClient(se).sendMail({
+                from: `"${senderName}" <${sender}>`,
+                to: se.client.emailId,
+                subject: se.outreach.subject,
+                html: emailContent,
+            });
+            se.delivered = true;
+            se.deliveryStatus = info.response;
+        } catch (error) {
+            se.delivered = false;
+            se.deliveryStatus = error.message;
+            se.state = ScheduledEmailState.FAILED;
+            await this.emailRepository.save(se);
+        }   
+    }
+}

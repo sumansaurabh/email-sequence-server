@@ -12,7 +12,7 @@ import { validate } from 'class-validator';
 import { UserService } from 'src/users/user.service';
 import { TransformDto } from 'src/utils/transform.decorator';
 import { TransformClassMethods } from 'src/utils/transform-class.decorator';
-import { ScheduledEmail } from 'src/entity/scheduled.email.entity';
+import { Email } from 'src/entity/email.entity';
 
 @Injectable()
 export class OutreachService {

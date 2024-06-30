@@ -46,6 +46,9 @@ export class MailBox extends BaseDbEntity {
     @Column()
     emailId: string;
 
+    @Column()
+    name: string;
+
     @Index()
     @Column()
     userId: number;
