@@ -16,8 +16,8 @@ export class Outreach extends BaseDbEntity {
     @Column()
     name: string;
 
-    @ManyToOne(() => User)
-    @JoinColumn({ name: 'id' })  // Specifies the foreign key column name
+    @Index()
+    @Column()
     userId: number;
 
     @Column('simple-json', { nullable: true })

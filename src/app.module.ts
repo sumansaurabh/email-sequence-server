@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { OutreachModule } from './outreach/outreach.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     CacheModule.register(),
     AuthModule,
     UserModule,
+    OutreachModule,
   ],
   providers: [AppService],
   controllers: [AppController],

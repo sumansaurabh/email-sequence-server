@@ -5,6 +5,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { Outreach } from 'src/entity/outreach.entity';
 import { OutreachController } from './outreach.controller';
 import { OutreachService } from './outreach.service';
+import { UserModule } from 'src/users/user.module';
 
 @Module({
   imports: [
@@ -16,4 +17,4 @@ import { OutreachService } from './outreach.service';
   controllers: [OutreachController],
   exports: [OutreachService, TypeOrmModule],
 })
-export class UserModule {}
+export class OutreachModule {}

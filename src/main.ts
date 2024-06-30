@@ -22,7 +22,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.setGlobalPrefix('api');
   app.use((req: Request, res: Response, next: NextFunction) => {
-    // console.log('Request Headers:', req.headers);
+    console.log('Request Headers:', req.headers);
     next();
   });
 
