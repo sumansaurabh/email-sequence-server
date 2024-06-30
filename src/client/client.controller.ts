@@ -18,8 +18,7 @@ import { RolesGuard } from 'src/auth/roels.guard';
 import { UserRole } from 'src/entity/user.entity';
 import { Roles } from 'src/auth/roles.decorator';
 
-@Controller('clients')
-@TransformClassMethods(ClientDto)
+@Controller('client')
 export class ClientController {
     constructor(private readonly clientService: ClientService) {}
 
@@ -39,7 +38,7 @@ export class ClientController {
         return clients;
     }
 
-    @Get()
+    @Get('user')
     @UseGuards(JwtAuthGuard)
     async findByUser(@Request() req): Promise<ClientDto[]> {
         const userId = req.user.id;

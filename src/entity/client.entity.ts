@@ -7,13 +7,13 @@ import { BaseDbEntity } from '../entity/basedb.entity';
 import { IsEmail } from 'class-validator';
 
 @Entity()
-@Index(['email', 'userId'], { unique: true })
+@Index(['emailId', 'userId'], { unique: true })
 export class Client extends BaseDbEntity{
   
   @Index({ unique: true })
   @IsEmail()
   @Column()
-  email: string;
+  emailId: string;
 
   @Index()
   @Column()
@@ -59,7 +59,7 @@ export class Client extends BaseDbEntity{
   company: string;
 
   @Column({default: true})
-  subscribed: boolean;
+  subscribed: boolean = true;
 
   @Column({ nullable: true})
   onboardingType: string;

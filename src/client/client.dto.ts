@@ -16,7 +16,7 @@ export class ClientDto {
     id: number;
 
     @IsEmail()
-    email: string;
+    emailId: string;
 
     userId: number;
 
@@ -73,7 +73,7 @@ export class ClientDto {
     company?: string;
 
     @IsBoolean()
-    subscribed: boolean;
+    subscribed: boolean = true;
 
     @IsOptional()
     @IsString()

@@ -5,8 +5,10 @@ import { Client } from '../entity/client.entity';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ClientDto } from './client.dto';
+import { TransformClassMethods } from 'src/utils/transform-class.decorator';
 
 @Injectable()
+@TransformClassMethods(ClientDto)
 export class ClientService {
   constructor(
     @InjectRepository(Client)
