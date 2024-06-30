@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { OutreachModule } from './outreach/outreach.module';
+import { MailBoxModule } from './mailbox/mailbox.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { OutreachModule } from './outreach/outreach.module';
     AuthModule,
     UserModule,
     OutreachModule,
+    MailBoxModule,
   ],
   providers: [AppService],
   controllers: [AppController],

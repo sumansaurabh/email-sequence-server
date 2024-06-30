@@ -1,7 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, In } from 'typeorm';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    Index,
+    ManyToOne,
+    In,
+} from 'typeorm';
 import { BaseDbEntity } from './basedb.entity';
 import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
+import { IsBoolean, IsNumber, IsString, ValidateNested } from 'class-validator';
 
 enum ScheduledEmailState {
     SCHEDULE = 'SCHEDULE',
@@ -9,15 +17,25 @@ enum ScheduledEmailState {
     FAILED = 'FAILED',
 }
 
-class SmtpConfig {
-    host: string;
-    port: number;
-    secure: boolean;
-    auth: {
-        user: string;
-        pass: string;
-    }
+class AuthConfig {
+    @IsString()
+    user: string;
 
+    @IsString()
+    pass: string;
+}
+export class SmtpConfig {
+    @IsString()
+    host: string;
+
+    @IsNumber()
+    port: number;
+
+    @IsBoolean()
+    secure: boolean;
+
+    @ValidateNested()
+    auth: AuthConfig;
 }
 
 @Entity()
