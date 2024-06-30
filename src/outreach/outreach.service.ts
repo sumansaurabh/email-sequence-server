@@ -44,7 +44,7 @@ export class OutreachService {
 
     @TransformDto(OutreachDto)
     async findAll(): Promise<Outreach[]> {
-        return await this.outreachRepository.find({ relations: ['user'] });
+        return await this.outreachRepository.find();
     }
 
     @TransformDto(OutreachDto)
