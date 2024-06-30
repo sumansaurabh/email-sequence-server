@@ -9,6 +9,9 @@ export class MailBoxDto {
     @IsEmail()
     emailId: string;
 
+    @IsString()
+    name: string;
+
     userId: number;
 
     @ValidateNested()

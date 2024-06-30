@@ -122,6 +122,12 @@ export class EmailService {
             console.error(`Email with ID ${id} not found in the tracking system`);
         }
         email.opened = true;
+        const prevCount = email.openedEmail ? email.openedEmail.count : 0;
+        email.openedEmail = {
+            count: prevCount + 1,
+            openedAt: new Date()
+        }
+        
         await this.update(email);
         return email;
     }

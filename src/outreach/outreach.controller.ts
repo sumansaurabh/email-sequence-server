@@ -61,7 +61,7 @@ export class OutreachController {
         return this.outreachService.findByUserId(userId);
     }
 
-    @Post('add/client/:clientId/outreach/:outreachId')
+    @Post(':outreachId/add/client/:clientId')
     @UseGuards(JwtAuthGuard)
     async addClient(
         @Request() req,

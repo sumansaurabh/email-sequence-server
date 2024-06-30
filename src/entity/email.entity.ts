@@ -22,6 +22,11 @@ class ClickedUrl {
     clickedAt: Date;
 }
 
+class OpenedEmail {
+    count: number = 0;
+    openedAt: Date;
+}
+
 @Entity()
 @Unique(['userId', 'client', 'outreach', 'outreachStateId'])
 export class Email extends BaseDbEntity {
@@ -71,12 +76,15 @@ export class Email extends BaseDbEntity {
     @Index()
     delivered: boolean;
 
-    @Column()
+    @Column({nullable: true})
     deliveryStatus: boolean;
 
     @Column({ default: false })
     @Index()
     opened: boolean;
+
+    @Column('simple-json', { nullable: true })
+    openedEmail: OpenedEmail;
 
     @Column('simple-json', { nullable: true })
     clicked: ClickedUrl[];
