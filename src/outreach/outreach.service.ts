@@ -12,15 +12,15 @@ import { validate } from 'class-validator';
 import { UserService } from 'src/users/user.service';
 import { TransformDto } from 'src/utils/transform.decorator';
 import { TransformClassMethods } from 'src/utils/transform-class.decorator';
+import { ScheduledEmail } from 'src/entity/scheduled.email.entity';
 
 @Injectable()
 export class OutreachService {
     saltOrRounds: number = 10;
 
     constructor(
-        private userService: UserService,
         @InjectRepository(Outreach)
-        private outreachRepository: Repository<Outreach>,
+        private outreachRepository: Repository<Outreach>
     ) {}
 
     @TransformDto(OutreachDto)

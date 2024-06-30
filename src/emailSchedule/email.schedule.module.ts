@@ -7,6 +7,7 @@ import { MailBoxModule } from 'src/mailbox/mailbox.module';
 import { ScheduledEmail } from 'src/entity/scheduled.email.entity';
 import { EmailScheduleService } from './email.schedule.service';
 import { ClientModule } from 'src/client/client.module';
+import { EmailScheduleController } from './email.schedule.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ScheduledEmail]),
@@ -16,6 +17,7 @@ import { ClientModule } from 'src/client/client.module';
   forwardRef(() => MailBoxModule), // Use forwardRef for potential circular dependency
   forwardRef(() => ClientModule), // Use forwardRef for potential circular dependency
   ],
+  controllers: [EmailScheduleController],
   providers: [EmailScheduleService],
   exports: [EmailScheduleService, TypeOrmModule],
 })

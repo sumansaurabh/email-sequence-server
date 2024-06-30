@@ -10,6 +10,7 @@ import { BaseDbEntity } from './basedb.entity';
 import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
 import { IsBoolean, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator';
+import { Exclude } from 'class-transformer';
 
 enum ScheduledEmailState {
     SCHEDULE = 'SCHEDULE',
@@ -22,6 +23,7 @@ class AuthConfig {
     user: string;
 
     @IsString()
+    @Exclude({ toPlainOnly: true })
     pass: string;
 }
 export class SmtpConfig {
