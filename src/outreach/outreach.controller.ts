@@ -38,4 +38,11 @@ export class OutreachController {
         const userId = req.user.id;
         return this.outreachService.findByUserId(userId);
     }
+
+    @Get('add/client/:id')
+    @UseGuards(JwtAuthGuard)
+    async addClient(@Request() req, @Param('id') id: number ): Promise<OutreachDto[]> {
+        const userId = req.user.id;
+        return this.outreachService.findByUserId(userId);
+    }
 }

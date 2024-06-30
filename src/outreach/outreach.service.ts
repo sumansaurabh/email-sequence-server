@@ -14,7 +14,6 @@ import { TransformDto } from 'src/utils/transform.decorator';
 import { TransformClassMethods } from 'src/utils/transform-class.decorator';
 
 @Injectable()
-@TransformClassMethods(OutreachDto)
 export class OutreachService {
     saltOrRounds: number = 10;
 
@@ -64,5 +63,10 @@ export class OutreachService {
     @TransformDto(OutreachDto)
     async findByUserId(userId: number): Promise<Outreach[]> {
         return await this.outreachRepository.find({ where: { userId: userId } });
+    }
+
+    @TransformDto(OutreachDto)
+    async findById(id: number): Promise<Outreach> {
+        return await this.outreachRepository.findOne({ where: { id: id } });
     }
 }

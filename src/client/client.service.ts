@@ -28,7 +28,7 @@ export class ClientService {
     return await this.clientRepository.find();
   }
 
-  async findOneById(id: number): Promise<Client> {
+  async findById(id: number): Promise<Client> {
     const client = await this.clientRepository.findOne({ where: { id: id } });
     if (!client) {
       throw new NotFoundException('Client not found');
@@ -41,22 +41,8 @@ export class ClientService {
     return clientList;
   }
 
-  async update(id: number, clientDto: ClientDto): Promise<Client> {
-    const client = await this.findOneById(id);
-    if (!client) {
-      throw new NotFoundException('Client not found');
-    }
-    Object.assign(client, clientDto);
-    const errors = await validate(client);
-    if (errors.length > 0) {
-      throw new BadRequestException('Validation failed');
-    }
-    await this.clientRepository.save(client);
-    return client;
-  }
-
   async delete(id: number, userId): Promise<void> {
-    const client = await this.findOneById(id);
+    const client = await this.findById(id);
     if (!client) {
       throw new NotFoundException('Client not found');
     }

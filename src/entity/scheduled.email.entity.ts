@@ -3,6 +3,7 @@ import { BaseDbEntity } from './basedb.entity';
 import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
 import { MailBox } from './mailbox.entity';
+import { IsNotEmpty } from 'class-validator';
 
 enum ScheduledEmailState {
     SCHEDULE = 'SCHEDULE',
@@ -10,12 +11,15 @@ enum ScheduledEmailState {
     FAILED = 'FAILED',
 }
 
+enum Priority {
+    HIGH = 'HIGH',
+    MEDIUM = 'MEDIUM',
+    LOW = 'LOW',
+}
+
 
 @Entity()
 export class ScheduledEmail extends BaseDbEntity {
-    @Index()
-    @Column()
-    name: string;
 
     @Index()
     @Column()
@@ -23,15 +27,7 @@ export class ScheduledEmail extends BaseDbEntity {
 
     @Index()
     @Column()
-    clientId: number;
-
-    @Index()
-    @Column()
     taskName: string;
-
-    @Index()
-    @Column()
-    sendEmailId: string;
 
     @Column({
         type: 'enum',
@@ -51,4 +47,17 @@ export class ScheduledEmail extends BaseDbEntity {
 
     @ManyToOne(() => MailBox)
     mailbox: MailBox;
+
+    @Column()
+    @Index()
+    scheduled10minInterval: string;
+
+    @Column({
+        type: 'enum',
+        enum: Priority,
+        default: Priority.MEDIUM,
+    })
+    @Index()
+    @IsNotEmpty()
+    priority: Priority
 }

@@ -16,7 +16,6 @@ import { TransformClassMethods } from 'src/utils/transform-class.decorator';
 @Injectable()
 @TransformClassMethods(MailBoxDto)
 export class MailBoxService {
-    saltOrRounds: number = 10;
 
     constructor(
         private userService: UserService,

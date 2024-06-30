@@ -30,7 +30,7 @@ export class AuthService {
   }
 
   async validateJwtPayload(payload: JwtPayloadDto): Promise<User> {
-    const user = await this.userService.findOneById(payload.sub);
+    const user = await this.userService.findById(payload.sub);
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }

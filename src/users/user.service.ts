@@ -39,7 +39,7 @@ export class UserService {
     return await this.validateUser(email, password);
   }
 
-  async findOneById(id: number): Promise<User> {
-    return await this.userRepository.findOneById(id);
+  async findById(id: number): Promise<User> {
+    return await this.userRepository.findOne({ where: { id }});
   }
 }

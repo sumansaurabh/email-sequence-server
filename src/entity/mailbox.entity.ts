@@ -9,7 +9,7 @@ import {
 import { BaseDbEntity } from './basedb.entity';
 import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
-import { IsBoolean, IsNumber, IsString, ValidateNested } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator';
 
 enum ScheduledEmailState {
     SCHEDULE = 'SCHEDULE',
@@ -50,4 +50,13 @@ export class MailBox extends BaseDbEntity {
 
     @Column('simple-json')
     smtpConfig: SmtpConfig;
+
+    @Column({default: 0})
+    @IsNumber()
+    scheduledCount: number;
+
+    @Column({default: 3})
+    @IsNotEmpty()
+    @IsNumber()
+    mailsPer10Mins: number;
 }
