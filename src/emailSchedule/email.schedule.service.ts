@@ -64,7 +64,7 @@ export class EmailScheduleService {
     }
     
 
-    async add(outreachId: number, userId: number, clientId: number): Promise<Outreach> {
+    async add(outreachId: number, userId: number, clientId: number): Promise<ScheduledEmail> {
         const outreach = await this.outreachService.findById(outreachId);
         if (!outreach) {
             throw new BadRequestException('Outreach not found');
@@ -85,6 +85,5 @@ export class EmailScheduleService {
         se.outreachStateId = 0;
         se.scheduled10minInterval = `${this.scheduledEmailTs(se.mailbox)}`;
         return await this.seRepository.save(se);
-        
     }
 }
