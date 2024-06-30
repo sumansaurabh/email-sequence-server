@@ -14,7 +14,7 @@ import { ClientService } from 'src/client/client.service';
 import { v4 as uuidv4 } from 'uuid';
 import { MailBox } from 'src/entity/mailbox.entity';
 import { log } from 'console';
-import { UrlShortener } from 'src/entity/url.shortner';
+import { UrlShortener } from 'src/entity/url.shortner.entity';
 
 
 @Injectable()
@@ -110,7 +110,7 @@ export class EmailService {
     async fetchScheduledEmails(): Promise<Email[]> {
         const nowTs = `${this.get10MinuteCeiling().getTime()}`;
         console.log(`Fetching scheduled emails for ${nowTs}`);
-        return await this.seRepository.find({ where: { scheduled10minInterval: nowTs } });
+        return await this.seRepository.find({ where: { scheduled10minInterval: nowTs }, relations: ['client', 'outreach' ,'mailbox'] });
     }
 
     async update(se: Email): Promise<Email> {

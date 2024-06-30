@@ -14,21 +14,21 @@ import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import * as path from 'path';
 import { Client } from 'src/entity/client.entity';
-import { UrlShortener } from 'src/entity/url.shortner';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { UrlShortener } from 'src/entity/url.shortner.entity';
 
 @Injectable()
 export class EmailScheduleService {
 
     constructor(
-        @InjectRepository(Email)
-        private emailRepository: Repository<Email>,
         @InjectRepository(UrlShortener)
         private urlShortnerRepository: Repository<UrlShortener>,
+        @InjectRepository(Email)
+        private emailRepository: Repository<Email>,
         private emailScheduleService: EmailService,
     ) {}
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async sendScheduledEmails() {
         console.log('Checking for scheduled emails to send...');
         const scheduledEmailList: Email[] =
@@ -41,11 +41,13 @@ export class EmailScheduleService {
                 const shouldSendEmail = this.shouldSendEmail(se);
                 processed++;
                 if (!shouldSendEmail) {
+                    console.log(`Skipping email ${se.id} for client ${se.client.emailId}`);
                     continue;
                 }
                 await this.sendEmail(se);
             } catch (error) {
                 console.error(`Error sending email: ${error.message}`);
+                console.error(error.stack);
                 se.state = ScheduledEmailState.FAILED;
             }
             await this.emailScheduleService.update(se);
@@ -60,7 +62,8 @@ export class EmailScheduleService {
     }
 
     renderEmailTemplate(templateName: string, data: Client): string {
-        const filePath = path.join(__dirname, '..', 'templates', `${templateName}.html`);
+        const filePath = path.join(__dirname, '../..', 'templates', `${templateName}`);
+        console.log(filePath);
         const source = fs.readFileSync(filePath, 'utf8');
         const template = Handlebars.compile(source);
         return template(data);
@@ -70,9 +73,13 @@ export class EmailScheduleService {
         const urlShortener: UrlShortener = await this.urlShortnerRepository.findOne({ where: { url: url } });
         let shortenUrl = "";
         if (urlShortener) {
+            console.log(`Creating new short URL for 1 ${urlShortener.id}`);
             shortenUrl = `${process.env.WEB_URL}/${urlShortener.id}`;   
         } else {
-            const newUrlShortener = await this.urlShortnerRepository.create({ url: url });
+            const newUrlShortener = await this.urlShortnerRepository.save({ url: url });
+            console.log(newUrlShortener);
+            console.log(`Creating new short URL for 2 ${newUrlShortener.id}`);
+
             shortenUrl = `${process.env.WEB_URL}/${newUrlShortener.id}`;
         }
         return `${shortenUrl}?cid=${clientId}&uid=${userId}&gid=${emailGuid}`;
@@ -112,6 +119,7 @@ export class EmailScheduleService {
     }
 
     async sendEmail(se: Email) {
+        process.env.WEB_URL = "http://localhost:11000/api"
         const emailTemplate = se.outreach.stateList[se.outreachStateId].templateId;
         const client = se.client;
         const mailbox = se.mailbox;
@@ -119,9 +127,10 @@ export class EmailScheduleService {
         const senderName = mailbox.name;
         const guid: string = uuidv4();
         let emailContent = this.renderEmailTemplate(emailTemplate, client);
+        console.log(`Email content: ${emailContent}`);
         emailContent = await this.replaceUrlsWithShortenedUrls(emailContent, client.id, se.userId, guid);
         emailContent += `<img src="${process.env.WEB_URL}/email/track/${guid}" style="display:none;" />`;
-
+        console.log(`Email content after URL replacement: ${emailContent}`);
         try {
             const info = await this.smtpClient(se).sendMail({
                 from: `"${senderName}" <${sender}>`,
@@ -129,9 +138,12 @@ export class EmailScheduleService {
                 subject: se.outreach.subject,
                 html: emailContent,
             });
+            console.log(`Email sent: ${info.response}`);
             se.delivered = true;
             se.deliveryStatus = info.response;
         } catch (error) {
+            console.error(`Error sending email: ${error.message}`);
+            console.error(error.stack);
             se.delivered = false;
             se.deliveryStatus = error.message;
             se.state = ScheduledEmailState.FAILED;

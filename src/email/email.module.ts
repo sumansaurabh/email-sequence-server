@@ -8,14 +8,13 @@ import { Email } from 'src/entity/email.entity';
 import { EmailService } from './email.service';
 import { ClientModule } from 'src/client/client.module';
 import { EmailController } from './email.controller';
-import { UrlShortener } from 'src/entity/url.shortner';
 import { EmailScheduleService } from './email.schedule.service';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UrlShortener } from 'src/entity/url.shortner.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Email]),
-  TypeOrmModule.forFeature([UrlShortener]),
+  imports: [TypeOrmModule.forFeature([Email, UrlShortener]),
   forwardRef(() => AuthModule), // <-- Use forwardRef() here
   forwardRef(() => UserModule), // Use forwardRef for potential circular dependency
   forwardRef(() => OutreachModule), // Use forwardRef for potential circular dependency
