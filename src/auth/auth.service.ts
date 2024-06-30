@@ -25,6 +25,7 @@ export class AuthService {
     const payload = { username: validatedUser.email, sub: validatedUser.id };
     return {
       access_token: this.jwtService.sign(payload),
+      user: validatedUser,
     };
   }
 

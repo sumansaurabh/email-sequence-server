@@ -9,6 +9,7 @@ import {
 // import { EmailService } from './email/email.service';
 import { ConfigService } from './config/configuration';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NextFunction } from 'express';
 
 async function bootstrap() {
   const configService = new ConfigService();
@@ -20,10 +21,11 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.setGlobalPrefix('api');
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    // console.log('Request Headers:', req.headers);
+    next();
+  });
 
-  
-
-  // const emailService = app.get(EmailService);
   // setupEmailScheduler(emailService);
   const port = configService.get('PORT') || 3000;
   console.log("PORT: ", port)
