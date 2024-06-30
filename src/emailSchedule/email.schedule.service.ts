@@ -85,7 +85,10 @@ export class EmailScheduleService {
         se.taskName = uuidv4();
         se.outreachStateId = 0;
         se.scheduled10minInterval = `${this.scheduledEmailTs(se.mailbox)}`;
-        return await this.seRepository.save(se);
+        const response = await this.seRepository.save(se);
+        se.mailbox.scheduledCount += 1;
+        await this.mailboxService.update(se.mailbox);
+        return response;
     }
 
     async findAll(): Promise<ScheduledEmail[]> {

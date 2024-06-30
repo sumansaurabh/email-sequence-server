@@ -34,6 +34,7 @@ export class ScheduledEmail extends BaseDbEntity {
         enum: ScheduledEmailState,
         default: ScheduledEmailState.SCHEDULE,
     })
+    @Index()
     state: ScheduledEmailState;
 
     @ManyToOne(() => Client)
