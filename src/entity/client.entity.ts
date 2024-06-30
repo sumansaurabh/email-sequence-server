@@ -27,15 +27,6 @@ export class Client extends BaseDbEntity{
   phone: string;
 
   @Column({ nullable: true})
-  address: string;
-
-  @Column({ nullable: true})
-  city: string;
-
-  @Column({ nullable: true})
-  state: string;
-
-  @Column({ nullable: true})
   zip: string;
 
   @Column({ nullable: true})
@@ -67,4 +58,8 @@ export class Client extends BaseDbEntity{
 
   @Column({ nullable: true})
   onboardingType: string;
+
+  @Column('simple-json', { nullable: true })
+  address: { street: string; city: string; state: string };
+
 }

@@ -5,6 +5,7 @@ import { UserModule } from './users/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AuthModule } from './auth/auth.module';
       },
       inject: [ConfigService], 
     }),
+    CacheModule.register(),
     AuthModule,
     UserModule,
   ],
