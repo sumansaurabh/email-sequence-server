@@ -7,7 +7,7 @@ import {
   OneToOne,
 } from 'typeorm';
 import { BaseDbEntity } from '../entity/basedb.entity';
-import { OutReach } from './outreach.entity';
+import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
 
 @Entity()
@@ -56,6 +56,6 @@ export class Email extends BaseDbEntity {
   @Column({ nullable: true })
   stage: number;
 
-  @ManyToOne(() => OutReach)
-  outreach: OutReach;
+  @ManyToOne(() => Outreach)
+  outreach: Outreach;
 }

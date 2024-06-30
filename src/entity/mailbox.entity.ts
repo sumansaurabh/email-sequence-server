@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, In } from 'typeorm';
 import { BaseDbEntity } from './basedb.entity';
-import { OutReach } from './outreach.entity';
+import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
 
 enum ScheduledEmailState {

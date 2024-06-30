@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, In } from 'typeorm';
 import { BaseDbEntity } from './basedb.entity';
-import { OutReach } from './outreach.entity';
+import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
 import { MailBox } from './mailbox.entity';
 
@@ -43,8 +43,8 @@ export class ScheduledEmail extends BaseDbEntity {
     @ManyToOne(() => Client)
     client: Client;
 
-    @ManyToOne(() => OutReach)
-    outreach: OutReach;
+    @ManyToOne(() => Outreach)
+    outreach: Outreach;
 
     @Column()
     outreachStateId: number;
