@@ -8,7 +8,6 @@ import { UserRole } from 'src/entity/user.entity';
 import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('outreach')
-@Unique(['name', 'userId'])  // Composite unique constraint
 export class OutreachController {
     constructor(private readonly outreachService: OutreachService) {}
 
@@ -23,7 +22,7 @@ export class OutreachController {
     @UseGuards(JwtAuthGuard)
     async put(@Request() req, @Body() outreachDto: OutreachDto): Promise<OutreachDto> {
         outreachDto.userId = req.user.id;
-        return this.outreachService.add(outreachDto);
+        return this.outreachService.update(outreachDto);
     }
 
     @Get()

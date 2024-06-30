@@ -44,7 +44,11 @@ export class OutreachService {
     }
 
     @TransformDto(OutreachDto)
-    async update(id: number, outreachDto: OutreachDto): Promise<Outreach> {
+    async update(outreachDto: OutreachDto): Promise<Outreach> {
+        const id = outreachDto.id;
+        if(!id) {
+            throw new BadRequestException('Outreach ID is required');
+        }
         const existingOutreach = await this.outreachRepository.find({ where: { id: id } });
         if (!existingOutreach) {
             throw new BadRequestException('Outreach not found');

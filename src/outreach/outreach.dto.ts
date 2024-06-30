@@ -9,7 +9,7 @@ export class OutreachDto {
     @IsNotEmpty()
     name: string;
 
-    id: string;
+    id: number;
 
     userId: number; // This corresponds to the foreign key reference to the User entity
 
