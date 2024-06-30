@@ -11,6 +11,7 @@ export class State {
 }
 
 @Entity()
+@Index(['name', 'userId'], { unique: true })
 export class Outreach extends BaseDbEntity {
     @Index()
     @Column()

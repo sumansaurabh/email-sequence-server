@@ -27,14 +27,20 @@ export class OutreachService {
     @TransformDto(OutreachDto)
     async add(outreachDto: OutreachDto): Promise<Outreach> {
         const outreach = plainToClass(Outreach, outreachDto);
-
         const errors = await validate(outreach);
         if (errors.length > 0) {
             throw new BadRequestException('Validation failed');
         }
-
-        const savedOutreach = await this.outreachRepository.save(outreach);
-        return savedOutreach;
+        try {
+            const savedOutreach = await this.outreachRepository.save(outreach);
+            return savedOutreach;
+        }
+        catch (error) {
+            if (error.code === '23505') {
+                throw new BadRequestException(`Outreach with the name - [${outreachDto.name}] already exists`);
+            }
+            throw error;
+        }
     }
 
     @TransformDto(OutreachDto)
