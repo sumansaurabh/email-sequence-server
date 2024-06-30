@@ -9,7 +9,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { OutreachModule } from './outreach/outreach.module';
 import { MailBoxModule } from './mailbox/mailbox.module';
 import { ClientModule } from './client/client.module';
-import { EmailSchedularModule } from './emailSchedule/email.schedule.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -44,7 +44,7 @@ import { EmailSchedularModule } from './emailSchedule/email.schedule.module';
     OutreachModule,
     MailBoxModule,
     ClientModule,
-    EmailSchedularModule,
+    EmailModule,
   ],
   providers: [AppService],
   controllers: [AppController],

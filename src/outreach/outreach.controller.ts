@@ -18,13 +18,13 @@ import { RolesGuard } from 'src/auth/roels.guard';
 import { UserRole } from 'src/entity/user.entity';
 import { Roles } from 'src/auth/roles.decorator';
 import { Email } from 'src/entity/email.entity';
-import { EmailScheduleService } from 'src/emailSchedule/email.schedule.service';
+import { EmailService } from 'src/email/email.service';
 
 @Controller('outreach')
 export class OutreachController {
     constructor(
         private readonly outreachService: OutreachService,
-        private emailScheduleService: EmailScheduleService,
+        private emailScheduleService: EmailService,
     ) {}
 
     @Post()

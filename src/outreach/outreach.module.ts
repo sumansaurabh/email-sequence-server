@@ -6,14 +6,14 @@ import { Outreach } from 'src/entity/outreach.entity';
 import { OutreachController } from './outreach.controller';
 import { OutreachService } from './outreach.service';
 import { UserModule } from 'src/users/user.module';
-import { EmailSchedularModule } from 'src/emailSchedule/email.schedule.module';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Outreach]),
     forwardRef(() => AuthModule), // <-- Use forwardRef() here
     forwardRef(() => UserModule), // Use forwardRef for potential circular dependency
-    forwardRef(() => EmailSchedularModule), // Use forwardRef for potential circular dependency
+    forwardRef(() => EmailModule), // Use forwardRef for potential circular dependency
   ],
   providers: [OutreachService],
   controllers: [OutreachController],

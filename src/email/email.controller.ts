@@ -16,12 +16,12 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roels.guard';
 import { UserRole } from 'src/entity/user.entity';
 import { Roles } from 'src/auth/roles.decorator';
-import { EmailScheduleService } from './email.schedule.service';
+import { EmailService } from './email.service';
 import { Email } from 'src/entity/email.entity';
 
 @Controller('email')
-export class EmailScheduleController {
-    constructor(private readonly emailScheduleService: EmailScheduleService) {}
+export class EmailController {
+    constructor(private readonly emailScheduleService: EmailService) {}
 
     @Get()
     @UseGuards(JwtAuthGuard, RolesGuard)
