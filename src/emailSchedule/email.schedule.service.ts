@@ -64,6 +64,15 @@ export class EmailScheduleService {
     }
     
 
+    /**
+     * Asynchronously adds a scheduled email for a user with specified IDs.
+     * 
+     * @param userId The ID of the user for whom the scheduled email is being added.
+     * @param outreachId The ID of the outreach associated with the scheduled email.
+     * @param clientId The ID of the client associated with the scheduled email.
+     * @returns A Promise that resolves to the created ScheduledEmail object.
+     * @throws BadRequestException if the outreach, user, or client is not found.
+     */
     async add(userId: number, outreachId: number, clientId: number): Promise<ScheduledEmail> {
         const outreach = await this.outreachService.findById(outreachId);
         if (!outreach) {
