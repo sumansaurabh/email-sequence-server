@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, In } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index, ManyToOne, In, Unique } from 'typeorm';
 import { BaseDbEntity } from './basedb.entity';
 import { Outreach } from './outreach.entity';
 import { Client } from './client.entity';
@@ -17,8 +17,8 @@ enum Priority {
     LOW = 'LOW',
 }
 
-
 @Entity()
+@Unique(['userId', 'client', 'outreach', 'outreachStateId'])
 export class ScheduledEmail extends BaseDbEntity {
 
     @Index()
