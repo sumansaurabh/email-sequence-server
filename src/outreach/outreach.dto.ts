@@ -9,6 +9,8 @@ export class OutreachDto {
     @IsNotEmpty()
     name: string;
 
+    id: string;
+
     userId: number; // This corresponds to the foreign key reference to the User entity
 
     @ValidateNested({ each: true })

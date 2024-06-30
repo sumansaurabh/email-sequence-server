@@ -1,4 +1,4 @@
-import { Controller, Get, Request, Post, Body, Param, ParseIntPipe, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Request, Post, Body, Param, ParseIntPipe, UseGuards, BadRequestException, Put } from '@nestjs/common';
 import { OutreachService } from './outreach.service';
 import { OutreachDto } from './outreach.dto';
 import { Unique } from 'typeorm';
@@ -19,6 +19,13 @@ export class OutreachController {
         return this.outreachService.add(outreachDto);
     }
 
+    @Put()
+    @UseGuards(JwtAuthGuard)
+    async put(@Request() req, @Body() outreachDto: OutreachDto): Promise<OutreachDto> {
+        outreachDto.userId = req.user.id;
+        return this.outreachService.add(outreachDto);
+    }
+
     @Get()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN) // Only admins can access this route
@@ -26,8 +33,10 @@ export class OutreachController {
         return this.outreachService.findAll();
     }
 
-    @Get('user/:userId')
-    async findByUserId(@Param('userId', ParseIntPipe) userId: number): Promise<OutreachDto[]> {
+    @Get('user')
+    @UseGuards(JwtAuthGuard)
+    async findByUserId(@Request() req): Promise<OutreachDto[]> {
+        const userId = req.user.id;
         return this.outreachService.findByUserId(userId);
     }
 }
