@@ -20,6 +20,13 @@ export class AuthService {
     return user;
   }
 
+  /**
+   * Asynchronously logs in a user.
+   * 
+   * @param user - The user object containing email and password for login.
+   * @returns An object containing access token and user information upon successful login.
+   * @throws Error if validation of user fails or signing the JWT token fails.
+   */
   async login(user: LoginUserDto) {
     const validatedUser = await this.validateUser(user.email, user.password);
     const payload = { username: validatedUser.email, sub: validatedUser.id };
