@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { OutreachService } from './outreach.service';
 import { OutreachDto } from './outreach.dto';
+import { Unique } from 'typeorm';
 
 @Controller('outreach')
+@Unique(['name', 'userId'])  // Composite unique constraint
 export class OutreachController {
     constructor(private readonly outreachService: OutreachService) {}
 

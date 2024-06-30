@@ -1,8 +1,7 @@
-// src/users/user.service.ts
+// src/users/outreach.service.ts
 import {
     BadRequestException,
     Injectable,
-    UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -25,6 +24,7 @@ export class OutreachService {
         private outreachRepository: Repository<Outreach>,
     ) {}
 
+    @TransformDto(OutreachDto)
     async add(outreachDto: OutreachDto): Promise<Outreach> {
         const user = await this.userService.findOneById(outreachDto.userId);
         if (!user) {
@@ -42,11 +42,13 @@ export class OutreachService {
         return savedOutreach;
     }
 
+    @TransformDto(OutreachDto)
     async findAll(): Promise<Outreach[]> {
-        return await this.outreachRepository.find();
+        return await this.outreachRepository.find({ relations: ['user'] });
     }
 
+    @TransformDto(OutreachDto)
     async findByUserId(userId: number): Promise<Outreach[]> {
-        return await this.outreachRepository.find({ where: { userId: { id: userId } } });
+        return await this.outreachRepository.find({ where: { userId: userId } });
     }
 }
