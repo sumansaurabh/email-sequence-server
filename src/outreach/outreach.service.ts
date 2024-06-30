@@ -26,11 +26,6 @@ export class OutreachService {
 
     @TransformDto(OutreachDto)
     async add(outreachDto: OutreachDto): Promise<Outreach> {
-        const user = await this.userService.findOneById(outreachDto.userId);
-        if (!user) {
-            throw new BadRequestException('Invalid user');
-        }
-
         const outreach = plainToClass(Outreach, outreachDto);
 
         const errors = await validate(outreach);

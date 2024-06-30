@@ -1,4 +1,4 @@
-import { Controller, Get, Request, Post, Body, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Request, Post, Body, Param, ParseIntPipe, UseGuards, BadRequestException } from '@nestjs/common';
 import { OutreachService } from './outreach.service';
 import { OutreachDto } from './outreach.dto';
 import { Unique } from 'typeorm';

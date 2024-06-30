@@ -1,7 +1,7 @@
 import { State } from "src/entity/outreach.entity";
 
 
-import { IsNotEmpty, ValidateNested } from 'class-validator';
+import { ArrayNotEmpty, IsNotEmpty, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 
@@ -13,5 +13,6 @@ export class OutreachDto {
 
     @ValidateNested({ each: true })
     @Type(() => State)
+    @ArrayNotEmpty()
     stateList: State[];
 }
