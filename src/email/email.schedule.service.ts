@@ -19,7 +19,7 @@ import { UrlShortener } from 'src/entity/url.shortner.entity';
 
 @Injectable()
 export class EmailScheduleService {
-
+    smpClient = {};
     constructor(
         @InjectRepository(UrlShortener)
         private urlShortnerRepository: Repository<UrlShortener>,
@@ -28,7 +28,7 @@ export class EmailScheduleService {
         private emailScheduleService: EmailService,
     ) {}
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_10_MINUTES)
     async sendScheduledEmails() {
         console.log('Checking for scheduled emails to send...');
         const scheduledEmailList: Email[] =
@@ -106,6 +106,11 @@ export class EmailScheduleService {
 
     smtpClient(se: Email): nodemailer.Transporter{
         const smtpConfig = se.mailbox.smtpConfig;
+        const uniqueId = `${smtpConfig.host}-${smtpConfig.port}-${smtpConfig.auth.user}`
+        if (uniqueId in this.smpClient) {
+            return this.smpClient[uniqueId];
+        }
+
         const transporter = nodemailer.createTransport({
             host: smtpConfig.host,
             port: smtpConfig.port,
@@ -114,7 +119,15 @@ export class EmailScheduleService {
                 user: smtpConfig.auth.user,
                 pass: smtpConfig.auth.pass,
             },
+            logger: true, // Enable logger
+            debug: true,  // Enable debug output
+            connectionTimeout: 60000, // 60 seconds
+            greetingTimeout: 30000, // 30 seconds
+            socketTimeout: 60000, // 60 seconds
         });
+        console.log(`SMTP client created for ${se.mailbox.emailId}`);
+        console.log("SMTP Config: ", smtpConfig)
+        this.smpClient[uniqueId] = transporter;
         return transporter;
     }
 
@@ -132,13 +145,17 @@ export class EmailScheduleService {
         emailContent += `<img src="${process.env.WEB_URL}/email/track/${guid}" style="display:none;" />`;
         console.log(`Email content after URL replacement: ${emailContent}`);
         try {
+            console.log(`Sending email to ${se.client.emailId}`);
+            console.log(`subject: ${se.outreach.subject}`);
+            console.log(`name: ${senderName}`);
             const info = await this.smtpClient(se).sendMail({
                 from: `"${senderName}" <${sender}>`,
                 to: se.client.emailId,
-                subject: se.outreach.subject,
+                subject: "Hello world",
                 html: emailContent,
             });
             console.log(`Email sent: ${info.response}`);
+            
             se.delivered = true;
             se.deliveryStatus = info.response;
         } catch (error) {
