@@ -22,11 +22,12 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.setGlobalPrefix('api');
   app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log('Request Headers:', req.headers);
+    // console.log('Request Headers:', req.headers);
     next();
   });
 
   // setupEmailScheduler(emailService);
+
   const port = configService.get('PORT') || 3000;
   console.log("PORT: ", port)
   await app.listen(port, '0.0.0.0');

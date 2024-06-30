@@ -10,6 +10,8 @@ import { ClientModule } from 'src/client/client.module';
 import { EmailController } from './email.controller';
 import { UrlShortener } from 'src/entity/url.shortner';
 import { EmailScheduleService } from './email.schedule.service';
+import { ScheduleModule } from '@nestjs/schedule';
+
 
 @Module({
   imports: [TypeOrmModule.forFeature([Email]),
@@ -19,6 +21,7 @@ import { EmailScheduleService } from './email.schedule.service';
   forwardRef(() => OutreachModule), // Use forwardRef for potential circular dependency
   forwardRef(() => MailBoxModule), // Use forwardRef for potential circular dependency
   forwardRef(() => ClientModule), // Use forwardRef for potential circular dependency
+  ScheduleModule.forRoot(),
   ],
   controllers: [EmailController],
   providers: [EmailService, EmailScheduleService],

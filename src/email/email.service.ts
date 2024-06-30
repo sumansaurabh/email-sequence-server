@@ -109,6 +109,7 @@ export class EmailService {
 
     async fetchScheduledEmails(): Promise<Email[]> {
         const nowTs = `${this.get10MinuteCeiling().getTime()}`;
+        console.log(`Fetching scheduled emails for ${nowTs}`);
         return await this.seRepository.find({ where: { scheduled10minInterval: nowTs } });
     }
 

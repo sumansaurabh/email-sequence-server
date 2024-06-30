@@ -15,6 +15,7 @@ import * as Handlebars from 'handlebars';
 import * as path from 'path';
 import { Client } from 'src/entity/client.entity';
 import { UrlShortener } from 'src/entity/url.shortner';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class EmailScheduleService {
@@ -27,9 +28,12 @@ export class EmailScheduleService {
         private emailScheduleService: EmailService,
     ) {}
 
+    @Cron(CronExpression.EVERY_MINUTE)
     async sendScheduledEmails() {
+        console.log('Checking for scheduled emails to send...');
         const scheduledEmailList: Email[] =
             await this.emailScheduleService.fetchScheduledEmails();
+        console.log(`Found ${scheduledEmailList.length} scheduled emails`);
 
         let processed = 0;
         for (const se of scheduledEmailList) {
