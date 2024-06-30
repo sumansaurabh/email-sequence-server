@@ -18,7 +18,7 @@ import { RolesGuard } from 'src/auth/roels.guard';
 import { UserRole } from 'src/entity/user.entity';
 import { Roles } from 'src/auth/roles.decorator';
 
-@Controller('client')
+@Controller('clients')
 @TransformClassMethods(ClientDto)
 export class ClientController {
     constructor(private readonly clientService: ClientService) {}

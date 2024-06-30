@@ -7,7 +7,6 @@ import { validate } from 'class-validator';
 import { ClientDto } from './client.dto';
 
 @Injectable()
-
 export class ClientService {
   constructor(
     @InjectRepository(Client)
