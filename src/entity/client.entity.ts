@@ -7,12 +7,17 @@ import { BaseDbEntity } from '../entity/basedb.entity';
 import { IsEmail } from 'class-validator';
 
 @Entity()
+@Index(['email', 'userId'], { unique: true })
 export class Client extends BaseDbEntity{
   
   @Index({ unique: true })
   @IsEmail()
   @Column()
   email: string;
+
+  @Index()
+  @Column()
+  userId: number;
 
   @Column({ nullable: true})
   firstName: string;
