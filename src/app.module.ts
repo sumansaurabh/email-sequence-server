@@ -33,7 +33,10 @@ import { EmailModule } from './email/email.module';
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_DATABASE'),
           entities: [__dirname + '/**/entity/*.entity{.ts,.js}'],
-          synchronize: true,
+          ssl: {
+            rejectUnauthorized: false, // Adjust this based on your SSL requirements
+          },
+          synchronize: false,
         });
       },
       inject: [ConfigService], 
