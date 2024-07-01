@@ -5,6 +5,7 @@ import * as nodemailer from 'nodemailer';
 import { EmailService } from 'src/email/email.service';
 import {
     Email,
+    Priority,
     ScheduledEmailState,
 } from 'src/entity/email.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,41 +17,63 @@ import * as path from 'path';
 import { Client } from 'src/entity/client.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { UrlShortener } from 'src/entity/url.shortner.entity';
+import { TestEmailDto } from './email.dto';
+import { MailBoxService } from 'src/mailbox/mailbox.service';
+import { ClientService } from 'src/client/client.service';
+import { Outreach } from 'src/entity/outreach.entity';
 
 @Injectable()
 export class EmailScheduleService {
     smpClient = {};
+
+    priorityOrder = {
+        'HIGH': 1,
+        'MEDIUM': 2,
+        'LOW': 3,
+    };
     constructor(
         @InjectRepository(UrlShortener)
         private urlShortnerRepository: Repository<UrlShortener>,
         @InjectRepository(Email)
         private emailRepository: Repository<Email>,
-        private emailScheduleService: EmailService,
+        private emailService: EmailService,
+        private mailboxService: MailBoxService,
+        private clientService: ClientService,
     ) {}
 
     @Cron(CronExpression.EVERY_10_MINUTES)
     async sendScheduledEmails() {
         console.log('Checking for scheduled emails to send...');
         const scheduledEmailList: Email[] =
-            await this.emailScheduleService.fetchScheduledEmails();
+            await this.emailService.fetchScheduledEmails();
         console.log(`Found ${scheduledEmailList.length} scheduled emails`);
+        // bring se with priority 1 to the top
+        scheduledEmailList.sort((a, b) => this.priorityOrder[a.priority] - this.priorityOrder[b.priority]);
 
         let processed = 0;
-        for (const se of scheduledEmailList) {
-            try {
-                const shouldSendEmail = this.shouldSendEmail(se);
-                processed++;
-                if (!shouldSendEmail) {
-                    console.log(`Skipping email ${se.id} for client ${se.client.emailId}`);
-                    continue;
-                }
-                await this.sendEmail(se);
-            } catch (error) {
-                console.error(`Error sending email: ${error.message}`);
-                console.error(error.stack);
-                se.state = ScheduledEmailState.FAILED;
+        for (var i = 0; i < scheduledEmailList.length; i++) {
+            const se = scheduledEmailList[i];
+            if (i > 3) {
+                console.log(`Skipping email ${se.id} for client ${se.client.emailId}`);
+                se.priority = Priority.HIGH;
+                se.scheduled10minInterval = `${this.emailService.get10MinuteCeiling().getTime()}`;
             }
-            await this.emailScheduleService.update(se);
+            else {
+                try {
+                    const shouldSendEmail = this.shouldSendEmail(se);
+                    processed++;
+                    if (!shouldSendEmail) {
+                        console.log(`Skipping email ${se.id} for client ${se.client.emailId}`);
+                        continue;
+                    }
+                    await this.sendEmail(se);
+                } catch (error) {
+                    console.error(`Error sending email: ${error.message}`);
+                    console.error(error.stack);
+                    se.state = ScheduledEmailState.FAILED;
+                }
+            }
+            await this.emailService.update(se);
         }
     }
 
@@ -69,31 +92,33 @@ export class EmailScheduleService {
         return template(data);
     }
 
-    async fetchShortUrl(url: string, clientId: number, userId: number, emailGuid: string): Promise<string> {
+    async fetchShortUrl(url: string, emailGuid: number): Promise<string> {
         const urlShortener: UrlShortener = await this.urlShortnerRepository.findOne({ where: { url: url } });
         let shortenUrl = "";
         if (urlShortener) {
             console.log(`Creating new short URL for 1 ${urlShortener.id}`);
-            shortenUrl = `${process.env.WEB_URL}/${urlShortener.id}`;   
+            shortenUrl = `${process.env.WEB_URL}/email/redirect/${urlShortener.id}`;   
         } else {
             const newUrlShortener = await this.urlShortnerRepository.save({ url: url });
             console.log(newUrlShortener);
             console.log(`Creating new short URL for 2 ${newUrlShortener.id}`);
 
-            shortenUrl = `${process.env.WEB_URL}/${newUrlShortener.id}`;
+            shortenUrl = `${process.env.WEB_URL}/email/redirect/${newUrlShortener.id}`;
         }
-        return `${shortenUrl}?cid=${clientId}&uid=${userId}&gid=${emailGuid}`;
+        return `${shortenUrl}?gid=${emailGuid}`;
     }
 
-    async replaceUrlsWithShortenedUrls(content: string, clientId: number, userId: number, emailGuid: string): Promise<string> {
+    async replaceUrlsWithShortenedUrls(content: string, emailGuid: number): Promise<string> {
         const urlRegex = /(https?:\/\/[^\s]+)/g;
         const urls = content.match(urlRegex);
         if (!urls) {
             return content;
         }
         const replacements = await Promise.all(
-            urls.map(async (url) => {
-                const shortUrl = await this.fetchShortUrl(url, clientId, userId, emailGuid);
+            urls.map(async (furl) => {
+                // remove last character if it is a punctuation
+                const url = furl[furl.length - 1].match(/[.,"'!?]/) ? furl.slice(0, -1) : furl;
+                const shortUrl = await this.fetchShortUrl(url, emailGuid);
                 return { url, shortUrl };
             })
         );
@@ -140,10 +165,9 @@ export class EmailScheduleService {
         const senderName = mailbox.name;
         const guid: string = uuidv4();
         let emailContent = this.renderEmailTemplate(emailTemplate, client);
-        console.log(`Email content: ${emailContent}`);
-        emailContent = await this.replaceUrlsWithShortenedUrls(emailContent, client.id, se.userId, guid);
-        emailContent += `<img src="${process.env.WEB_URL}/email/track/${guid}" style="display:none;" />`;
-        console.log(`Email content after URL replacement: ${emailContent}`);
+        console.log(`Email id: ${se.id}`);
+        emailContent = await this.replaceUrlsWithShortenedUrls(emailContent, se.id);
+        emailContent += `<img src="${process.env.WEB_URL}/email/track/${se.id}" style="display:none;" />`;
         try {
             console.log(`Sending email to ${se.client.emailId}`);
             console.log(`subject: ${se.outreach.subject}`);
@@ -155,7 +179,7 @@ export class EmailScheduleService {
                 html: emailContent,
             });
             console.log(`Email sent: ${info.response}`);
-            
+            se.state = ScheduledEmailState.SENT;
             se.delivered = true;
             se.deliveryStatus = info.response;
         } catch (error) {
@@ -164,7 +188,35 @@ export class EmailScheduleService {
             se.delivered = false;
             se.deliveryStatus = error.message;
             se.state = ScheduledEmailState.FAILED;
-            await this.emailRepository.save(se);
         }   
+    }
+
+    async testEmailService(testEmailDto: TestEmailDto): Promise<Email> {
+
+        const mailbox = await this.mailboxService.findById(testEmailDto.mailboxId);
+        const smtpConfig = mailbox.smtpConfig;
+        const client = await this.clientService.findById(testEmailDto.clientId);
+        const outreach = new Outreach();
+        outreach.name = "Test Outreach";
+        outreach.subject = "Test Subject";
+        outreach.stateList = [{
+            name: "Test State",
+            templateId: testEmailDto.templateId,
+            scheduleAfterDays: 0,
+            description: "Test Description",
+        }]
+
+        const email: Email = new Email();
+        email.id = 345;
+        email.mailbox = mailbox;
+        email.outreach = outreach;
+        email.client = client;
+        email.outreachStateId = 0;
+        email.scheduled10minInterval = `${this.emailService.get10MinuteCeiling().getTime()}`;
+        email.priority = Priority.MEDIUM;
+        email.userId = testEmailDto.userId;
+        email.taskName = uuidv4();
+        await this.sendEmail(email);
+        return email;
     }
 }

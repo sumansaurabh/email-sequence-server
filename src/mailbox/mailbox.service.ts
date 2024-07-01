@@ -56,4 +56,9 @@ export class MailBoxService {
     async findByUserId(userId: number): Promise<MailBox[]> {
         return await this.mailBoxRepository.find({ where: { userId: userId } });
     }
+
+    @TransformDto(MailBoxDto)
+    async findById(id: number): Promise<MailBox> {
+        return await this.mailBoxRepository.findOne({ where: { id: id } });
+    }
 }

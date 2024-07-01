@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Outreach } from 'src/entity/outreach.entity';
 import { UserService } from 'src/users/user.service';
 import { OutreachService } from 'src/outreach/outreach.service';
 import { MailBoxService } from 'src/mailbox/mailbox.service';
@@ -13,7 +12,6 @@ import { Email } from 'src/entity/email.entity';
 import { ClientService } from 'src/client/client.service';
 import { v4 as uuidv4 } from 'uuid';
 import { MailBox } from 'src/entity/mailbox.entity';
-import { log } from 'console';
 import { UrlShortener } from 'src/entity/url.shortner.entity';
 
 

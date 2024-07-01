@@ -11,10 +11,10 @@ export enum ScheduledEmailState {
     FAILED = 'FAILED',
 }
 
-enum Priority {
-    HIGH = 'HIGH',
-    MEDIUM = 'MEDIUM',
-    LOW = 'LOW',
+export enum Priority {
+    HIGH = "HIGH",
+    MEDIUM = "MEDIUM",
+    LOW = "LOW",
 }
 
 class ClickedUrl {
