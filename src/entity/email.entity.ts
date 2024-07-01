@@ -81,6 +81,7 @@ export class Email extends BaseDbEntity {
     deliveryStatus: string;
 
     @Column({nullable: true})
+    @Index()
     messageId: string;
 
     @Column({nullable: true})
@@ -90,6 +91,10 @@ export class Email extends BaseDbEntity {
     @Column({ default: false })
     @Index()
     opened: boolean;
+
+    @Column({default: false})
+    @Index()
+    replied: boolean;
 
     @Column('simple-json', { nullable: true })
     openedEmail: OpenedEmail;

@@ -91,8 +91,6 @@ export class EmailFetchService {
 
         console.log('Delivered emails:', deliveredEmails.length);
 
-        return;
-
         console.log('gettng connection:', mailbox.id);
         const connection = await this.getImapConnection(mailbox);
         console.log('connection received:', connection);
@@ -128,12 +126,11 @@ export class EmailFetchService {
             console.log('Emails found:', results.length);
             console.log('Delivered emails:', deliveredMessageIds);
             // Filter results to only include emails that are replies to delivered emails
+            const repliedMessageIds = [];
             const filteredResults = results.filter((res) => {
-                console.log('res:', JSON.stringify(res));
                 let headers = res.parts.find(
                     (part) => part.which === 'HEADER.FIELDS (MESSAGE-ID IN-REPLY-TO)',
                 );
-                console.log('headers:', headers);
                 if (!headers) {
                     return false;
                 }
@@ -142,9 +139,8 @@ export class EmailFetchService {
                     return false;
                 }
                 for (const id of headers['in-reply-to']) {
-                    console.log('id:', id, deliveredMessageIds);
-
                     if(deliveredMessageIds.includes(id)) {
+                        repliedMessageIds.push(id);
                         return true;
                     }
                 }
@@ -152,30 +148,9 @@ export class EmailFetchService {
             });
 
             console.log('Filtered emails:', filteredResults.length);
-
-            for (const res of filteredResults) {
-                const part = res.parts.find((part) => part.which === 'TEXT');
-                const id = res.attributes.uid;
-                const idHeader = 'Imap-Id: ' + id + '\r\n';
-
-                const parsed = await simpleParser(idHeader + part.body);
-                console.log(
-                    'Email parsed:',
-                    parsed.subject,
-                    parsed.from.value[0].address,
-                    parsed.text,
-                );
-
-                if (parsed.headers.has('in-reply-to')) {
-                    const originalMsgId = parsed.headers.get('in-reply-to');
-                    // Update the database to mark the original email as replied
-                    // Example: updateEmailStatusInDatabase(originalMsgId, 'replied')
-                    console.log(
-                        `Email with Message-ID ${originalMsgId} has been replied to.`,
-                    );
-                }
+            for(const rId of repliedMessageIds) {
+                await this.emailService.updateEmailReplied(rId);
             }
-
             await connection.end();
         } catch (err) {
             console.error('Error processing emails:', err);

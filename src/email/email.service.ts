@@ -183,4 +183,17 @@ export class EmailService {
         });
         return response.filter((email) => email.mailbox.id === mailbox.id);
     }
+
+    async updateEmailReplied(rId: string): Promise<Email> {
+        const deleteResult = await this.seRepository.delete({ parentMessageId: rId });
+        if (!deleteResult) {
+            return null;
+        }
+        const email = await this.seRepository.findOne({ where: { messageId: rId } });
+        if (!email) {
+            return null;
+        }
+        email.replied = true;
+        return await this.update(email);
+    }
 }
