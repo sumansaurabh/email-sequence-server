@@ -11,6 +11,11 @@ import { ConfigService } from './config/configuration';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NextFunction } from 'express';
 
+/**
+ * Asynchronous function to bootstrap the application.
+ * This function initializes the application with necessary configurations and starts listening on the specified port.
+ * @throws {Error} If there is an issue during the bootstrap process.
+ */
 async function bootstrap() {
   const configService = new ConfigService();
   const app = await NestFactory.create<NestFastifyApplication>(
