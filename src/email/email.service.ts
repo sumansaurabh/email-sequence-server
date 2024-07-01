@@ -136,6 +136,7 @@ export class EmailService {
 
     async updateEmailUrlClicked(id: number, url: string): Promise<Email> {
         if (!id) {
+            console.error(`Email ID is required to track URL click`);
             return;
         }
         const email = await this.seRepository.findOne({ where: { id: id } });
@@ -144,8 +145,10 @@ export class EmailService {
                 `Email with ID ${id} not found in the tracking system`,
             );
         }
-
-        email.clicked = [{ url: url, clickedAt: new Date() }];
+        if (!email.clicked) {
+            email.clicked = [];
+        }
+        email.clicked.push({ url: url, clickedAt: new Date() });
         await this.update(email);
         return email;
     }

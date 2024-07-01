@@ -53,10 +53,11 @@ export class EmailController {
     @Redirect()
     async urlOpened(
         @Param('id') id: number,
-        @Query('eid') eid: number,
+        @Query('gid') gid: number,
         @Res() res: Response,
     ) {
-        const url = await this.emailService.updateUrlOpened(id, eid);
+        console.log(`URL Opened for email ${gid}`);
+        const url = await this.emailService.updateUrlOpened(id, gid);
         return { statusCode: HttpStatus.FOUND, url };
     }
 
