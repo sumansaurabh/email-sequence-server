@@ -73,6 +73,7 @@ export class EmailScheduleService {
                     se.state = ScheduledEmailState.FAILED;
                 }
             }
+
             await this.emailService.update(se);
         }
     }
@@ -163,7 +164,6 @@ export class EmailScheduleService {
         const mailbox = se.mailbox;
         const sender = mailbox.emailId;
         const senderName = mailbox.name;
-        const guid: string = uuidv4();
         let emailContent = this.renderEmailTemplate(emailTemplate, client);
         console.log(`Email id: ${se.id}`);
         emailContent = await this.replaceUrlsWithShortenedUrls(emailContent, se.id);
@@ -182,13 +182,18 @@ export class EmailScheduleService {
             se.state = ScheduledEmailState.SENT;
             se.delivered = true;
             se.deliveryStatus = info.response;
+            se.messageId = info.messageId;
+            se.mailbox.sentEmails += 1;            
         } catch (error) {
             console.error(`Error sending email: ${error.message}`);
             console.error(error.stack);
             se.delivered = false;
             se.deliveryStatus = error.message;
             se.state = ScheduledEmailState.FAILED;
-        }   
+            se.mailbox.failedEmails += 1;
+        }
+        se.mailbox.scheduledCount -= 1;
+        await this.mailboxService.update(mailbox);
     }
 
     async testEmailService(testEmailDto: TestEmailDto): Promise<Email> {

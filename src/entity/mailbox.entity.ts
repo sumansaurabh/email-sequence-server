@@ -40,6 +40,17 @@ export class SmtpConfig {
     auth: AuthConfig;
 }
 
+export class ImapConfig {
+    @IsString()
+    host: string;
+
+    @IsNumber()
+    port: number;
+
+    @ValidateNested()
+    auth: AuthConfig;
+}
+
 @Entity()
 export class MailBox extends BaseDbEntity {
     @Index({ unique: true })
@@ -56,6 +67,9 @@ export class MailBox extends BaseDbEntity {
     @Column('simple-json')
     smtpConfig: SmtpConfig;
 
+    @Column('simple-json')
+    imapConfig: ImapConfig;
+
     @Column({default: 0})
     @IsNumber()
     scheduledCount: number;
@@ -64,4 +78,16 @@ export class MailBox extends BaseDbEntity {
     @IsNotEmpty()
     @IsNumber()
     mailsPer10Mins: number;
+
+    @Column()
+    @IsBoolean()
+    shouldCheckReplies: boolean;
+
+    @Column({default: 0})
+    @IsNumber()
+    sentEmails: number;
+
+    @Column({default: 0})
+    @IsNumber()
+    failedEmails: number;
 }

@@ -11,6 +11,7 @@ import { EmailController } from './email.controller';
 import { EmailScheduleService } from './email.schedule.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UrlShortener } from 'src/entity/url.shortner.entity';
+import { EmailFetchService } from './email.fetch.service';
 
 
 @Module({
@@ -23,7 +24,7 @@ import { UrlShortener } from 'src/entity/url.shortner.entity';
   ScheduleModule.forRoot(),
   ],
   controllers: [EmailController],
-  providers: [EmailService, EmailScheduleService],
-  exports: [EmailService, EmailScheduleService, TypeOrmModule],
+  providers: [EmailService, EmailScheduleService, EmailFetchService],
+  exports: [EmailService, EmailScheduleService, EmailFetchService, TypeOrmModule],
 })
 export class EmailModule {}

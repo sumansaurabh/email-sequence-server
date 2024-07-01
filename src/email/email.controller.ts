@@ -19,12 +19,14 @@ import { EmailService } from './email.service';
 import { Email } from 'src/entity/email.entity';
 import { TestEmailDto } from './email.dto';
 import { EmailScheduleService } from './email.schedule.service';
+import { EmailFetchService } from './email.fetch.service';
 
 @Controller('email')
 export class EmailController {
     constructor(
         private readonly emailService: EmailService,
         private readonly emailScheduleService: EmailScheduleService,
+        private readonly emailFetchService: EmailFetchService,
     ) {}
 
     @Get()
@@ -67,5 +69,15 @@ export class EmailController {
     ): Promise<Email> {
         testEmailDto.userId = req.user.id;
         return await this.emailScheduleService.testEmailService(testEmailDto);
+    }
+
+    @Get('check')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN) // Only admins can access this route
+    async checkEmails(
+        @Request() req,
+    ): Promise<string> {
+        await this.emailFetchService.runEmailDeliveredCron();
+        return 'Checking emails';
     }
 }

@@ -57,6 +57,7 @@ export class Email extends BaseDbEntity {
     outreachStateId: number;
 
     @ManyToOne(() => MailBox)
+    @Index()
     mailbox: MailBox;
 
     @Column()
@@ -76,8 +77,15 @@ export class Email extends BaseDbEntity {
     @Index()
     delivered: boolean;
 
+    @Column()
+    @Index()
+    deliveryTime: Date;
+
     @Column({nullable: true})
-    deliveryStatus: boolean;
+    deliveryStatus: string;
+
+    @Column({nullable: true})
+    messageId: string;
 
     @Column({ default: false })
     @Index()
