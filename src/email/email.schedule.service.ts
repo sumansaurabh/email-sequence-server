@@ -44,8 +44,7 @@ export class EmailScheduleService {
     // @Cron(CronExpression.EVERY_10_MINUTES)
     async sendScheduledEmails() {
         console.log('Checking for scheduled emails to send...');
-        const scheduledEmailList: Email[] =
-            await this.emailService.fetchScheduledEmails();
+        const scheduledEmailList: Email[] = await this.emailService.fetchScheduledEmails();
         console.log(`Found ${scheduledEmailList.length} scheduled emails`);
         // bring se with priority 1 to the top
         scheduledEmailList.sort((a, b) => this.priorityOrder[a.priority] - this.priorityOrder[b.priority]);
@@ -66,7 +65,7 @@ export class EmailScheduleService {
                         console.log(`Skipping email ${se.id} for client ${se.client.emailId}`);
                         continue;
                     }
-                    await this.sendEmail(se);
+                    await this.sendEmail(se);                    
                 } catch (error) {
                     console.error(`Error sending email: ${error.message}`);
                     console.error(error.stack);
@@ -79,7 +78,7 @@ export class EmailScheduleService {
     }
 
     private shouldSendEmail(se: Email): boolean {
-        if (se.state === ScheduledEmailState.SENT) {
+        if (se.state === ScheduledEmailState.DELIVERED) {
             return false;
         }
         return se.client.subscribed;
@@ -178,6 +177,8 @@ export class EmailScheduleService {
         nextEmail.userId = email.userId;
         nextEmail.taskName = uuidv4();
         await this.emailRepository.save(nextEmail);
+        email.mailbox.scheduledCount += 1;
+        await this.mailboxService.update(email.mailbox);
     }
 
     async sendEmail(se: Email) {
@@ -203,16 +204,15 @@ export class EmailScheduleService {
                 html: emailContent,
             });
             console.log(`Email sent: ${info.response}`);
-            se.state = ScheduledEmailState.SENT;
-            se.delivered = true;
+            se.state = ScheduledEmailState.DELIVERED;
             se.deliveryTime = new Date();
             se.deliveryStatus = info.response;
             se.messageId = info.messageId;
-            se.mailbox.sentEmails += 1;          
+            se.mailbox.sentEmails += 1;
+            await this.scheduleSubsequentEmails(se);       
         } catch (error) {
             console.error(`Error sending email: ${error.message}`);
             console.error(error.stack);
-            se.delivered = false;
             se.deliveryStatus = error.message;
             se.state = ScheduledEmailState.FAILED;
             se.mailbox.failedEmails += 1;

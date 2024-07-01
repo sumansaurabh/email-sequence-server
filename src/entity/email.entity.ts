@@ -7,7 +7,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export enum ScheduledEmailState {
     SCHEDULE = 'SCHEDULE',
-    SENT = 'SENT',
+    DELIVERED = 'DELIVERED',
     FAILED = 'FAILED',
 }
 
@@ -72,10 +72,6 @@ export class Email extends BaseDbEntity {
     @Index()
     @IsNotEmpty()
     priority: Priority
-
-    @Column({ default: false })
-    @Index()
-    delivered: boolean;
 
     @Column({nullable: true})
     @Index()

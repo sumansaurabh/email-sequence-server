@@ -31,5 +31,6 @@ export class Outreach extends BaseDbEntity {
     stateList: State[];
 
     @IsNotEmpty()
+    @Column()
     subject: string;
 }

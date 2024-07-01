@@ -5,7 +5,7 @@ import { MoreThanOrEqual, Repository } from 'typeorm';
 import { UserService } from 'src/users/user.service';
 import { OutreachService } from 'src/outreach/outreach.service';
 import { MailBoxService } from 'src/mailbox/mailbox.service';
-import { Email } from 'src/entity/email.entity';
+import { Email, ScheduledEmailState } from 'src/entity/email.entity';
 import { ClientService } from 'src/client/client.service';
 import { v4 as uuidv4 } from 'uuid';
 import { MailBox } from 'src/entity/mailbox.entity';
@@ -107,7 +107,7 @@ export class EmailService {
         const nowTs = `${this.get10MinuteCeiling().getTime()}`;
         console.log(`Fetching scheduled emails for ${nowTs}`);
         return await this.seRepository.find({
-            where: { scheduled10minInterval: nowTs, delivered: false},
+            where: { scheduled10minInterval: nowTs, state: ScheduledEmailState.SCHEDULE},
             relations: ['client', 'outreach', 'mailbox'],
         });
     }
@@ -170,11 +170,11 @@ export class EmailService {
         const now = new Date();
         const pastDate = new Date(
             now.getTime() - durationInHrs * 60 * 60 * 1000,
-        ); // Calculate the past date
+        );
         return await this.seRepository.find({
             where: {
                 mailbox: mailbox,
-                delivered: true,
+                state: ScheduledEmailState.DELIVERED,
                 deliveryTime: MoreThanOrEqual(pastDate),
             },
         });
