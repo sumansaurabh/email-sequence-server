@@ -10,7 +10,7 @@ import { UrlShortener } from 'src/entity/url.shortner.entity';
 import { MailBoxService } from 'src/mailbox/mailbox.service';
 import { ClientService } from 'src/client/client.service';
 import { MailBox } from 'src/entity/mailbox.entity';
-import moment from 'moment';
+import * as moment from 'moment';
 
 @Injectable()
 export class EmailFetchService {
@@ -54,7 +54,7 @@ export class EmailFetchService {
                 port: mailbox.imapConfig.port,
                 tls: true,
                 tlsOptions: { rejectUnauthorized: false }, // Allow self-signed certificates
-                authTimeout: 3000,
+                authTimeout: 60000,
             },
         };
         console.log(
@@ -89,6 +89,10 @@ export class EmailFetchService {
         const deliveredEmails =
             await this.emailService.fetchDeliveredEmails(mailbox);
 
+        console.log('Delivered emails:', deliveredEmails.length);
+
+        return;
+
         console.log('gettng connection:', mailbox.id);
         const connection = await this.getImapConnection(mailbox);
         console.log('connection received:', connection);
@@ -104,7 +108,6 @@ export class EmailFetchService {
             );
 
             const searchCriteria = [
-                'UNSEEN',
                 ['SINCE', moment().subtract(4, 'hour').toDate()],
             ];
             const fetchOptions = {
@@ -122,16 +125,30 @@ export class EmailFetchService {
                 await connection.end();
                 return;
             }
-
+            console.log('Emails found:', results.length);
+            console.log('Delivered emails:', deliveredMessageIds);
             // Filter results to only include emails that are replies to delivered emails
             const filteredResults = results.filter((res) => {
-                const headers = res.parts.find(
-                    (part) => part.which === 'HEADER',
-                ).body;
-                return (
-                    headers['in-reply-to'] &&
-                    deliveredMessageIds.includes(headers['in-reply-to'])
+                console.log('res:', JSON.stringify(res));
+                let headers = res.parts.find(
+                    (part) => part.which === 'HEADER.FIELDS (MESSAGE-ID IN-REPLY-TO)',
                 );
+                console.log('headers:', headers);
+                if (!headers) {
+                    return false;
+                }
+                headers = headers.body;
+                if (!headers['in-reply-to']) {
+                    return false;
+                }
+                for (const id of headers['in-reply-to']) {
+                    console.log('id:', id, deliveredMessageIds);
+
+                    if(deliveredMessageIds.includes(id)) {
+                        return true;
+                    }
+                }
+                return false;
             });
 
             console.log('Filtered emails:', filteredResults.length);

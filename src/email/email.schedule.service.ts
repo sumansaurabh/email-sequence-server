@@ -169,6 +169,7 @@ export class EmailScheduleService {
         nextEmail.mailbox = email.mailbox;
         nextEmail.outreach = outreach;
         nextEmail.outreachStateId = nextStateId;
+        nextEmail.parentMessageId = email.messageId;
         const scheduleAfterDays = nextState.scheduleAfterDays;
         const nextScheduledTime = new Date();
         nextScheduledTime.setDate(nextScheduledTime.getDate() + scheduleAfterDays);
@@ -194,9 +195,6 @@ export class EmailScheduleService {
         emailContent = await this.replaceUrlsWithShortenedUrls(emailContent, se.id);
         emailContent += `<img src="${process.env.WEB_URL}/email/track/${se.id}" style="display:none;" />`;
         try {
-            console.log(`Sending email to ${se.client.emailId}`);
-            console.log(`subject: ${se.outreach.subject}`);
-            console.log(`name: ${senderName}`);
             const info = await this.smtpClient(se).sendMail({
                 from: `"${senderName}" <${sender}>`,
                 to: se.client.emailId,

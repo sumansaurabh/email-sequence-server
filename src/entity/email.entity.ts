@@ -83,6 +83,10 @@ export class Email extends BaseDbEntity {
     @Column({nullable: true})
     messageId: string;
 
+    @Column({nullable: true})
+    @Index()
+    parentMessageId: string;
+
     @Column({ default: false })
     @Index()
     opened: boolean;

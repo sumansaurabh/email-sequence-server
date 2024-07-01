@@ -1,7 +1,7 @@
 // src/users/outreach.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Equal, MoreThanOrEqual, Repository } from 'typeorm';
 import { UserService } from 'src/users/user.service';
 import { OutreachService } from 'src/outreach/outreach.service';
 import { MailBoxService } from 'src/mailbox/mailbox.service';
@@ -174,12 +174,13 @@ export class EmailService {
         const pastDate = new Date(
             now.getTime() - durationInHrs * 60 * 60 * 1000,
         );
-        return await this.seRepository.find({
+        const response = await this.seRepository.find({
             where: {
-                mailbox: mailbox,
                 state: ScheduledEmailState.DELIVERED,
                 deliveryTime: MoreThanOrEqual(pastDate),
             },
+            relations: ['mailbox'], // Ensure 'mailbox' relation is loaded if needed
         });
+        return response.filter((email) => email.mailbox.id === mailbox.id);
     }
 }
