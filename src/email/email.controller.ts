@@ -80,4 +80,14 @@ export class EmailController {
         await this.emailFetchService.runEmailDeliveredCron();
         return 'Checking emails';
     }
+
+    @Get('schedule/email')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN) // Only admins can access this route
+    async sendScheduledEmails(
+        @Request() req,
+    ): Promise<string> {
+        await this.emailScheduleService.sendScheduledEmails();
+        return 'send scheduled emails';
+    }
 }

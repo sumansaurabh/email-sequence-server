@@ -77,7 +77,7 @@ export class Email extends BaseDbEntity {
     @Index()
     delivered: boolean;
 
-    @Column()
+    @Column({nullable: true})
     @Index()
     deliveryTime: Date;
 

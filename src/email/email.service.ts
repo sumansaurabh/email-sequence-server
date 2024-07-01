@@ -38,8 +38,7 @@ export class EmailService {
         return min;
     }
 
-    get10MinuteCeiling() {
-        const now = new Date();
+    get10MinuteCeiling(now: Date = new Date()) {
         const minutes = now.getMinutes();
         const next10MinuteCeiling = Math.ceil((minutes + 1) / 10) * 10;
         now.setMinutes(next10MinuteCeiling, 0, 0); // Set minutes to the next 10-minute ceiling, seconds and milliseconds to zero
@@ -108,7 +107,7 @@ export class EmailService {
         const nowTs = `${this.get10MinuteCeiling().getTime()}`;
         console.log(`Fetching scheduled emails for ${nowTs}`);
         return await this.seRepository.find({
-            where: { scheduled10minInterval: nowTs },
+            where: { scheduled10minInterval: nowTs, delivered: false},
             relations: ['client', 'outreach', 'mailbox'],
         });
     }

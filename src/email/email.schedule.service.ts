@@ -41,7 +41,7 @@ export class EmailScheduleService {
         private clientService: ClientService,
     ) {}
 
-    @Cron(CronExpression.EVERY_10_MINUTES)
+    // @Cron(CronExpression.EVERY_10_MINUTES)
     async sendScheduledEmails() {
         console.log('Checking for scheduled emails to send...');
         const scheduledEmailList: Email[] =
@@ -157,6 +157,29 @@ export class EmailScheduleService {
         return transporter;
     }
 
+    async scheduleSubsequentEmails(email: Email) {
+        const outreach = email.outreach;
+        const nextStateId = email.outreachStateId + 1;
+        if (nextStateId >= outreach.stateList.length) {
+            console.log(`All states completed for outreach ${outreach.name}`);
+            return;
+        }
+        const nextState = outreach.stateList[nextStateId];
+        const nextEmail = new Email();
+        nextEmail.client = email.client;
+        nextEmail.mailbox = email.mailbox;
+        nextEmail.outreach = outreach;
+        nextEmail.outreachStateId = nextStateId;
+        const scheduleAfterDays = nextState.scheduleAfterDays;
+        const nextScheduledTime = new Date();
+        nextScheduledTime.setDate(nextScheduledTime.getDate() + scheduleAfterDays);
+        nextEmail.scheduled10minInterval = `${this.emailService.get10MinuteCeiling(nextScheduledTime).getTime()}`;
+        nextEmail.priority = email.priority;
+        nextEmail.userId = email.userId;
+        nextEmail.taskName = uuidv4();
+        await this.emailRepository.save(nextEmail);
+    }
+
     async sendEmail(se: Email) {
         process.env.WEB_URL = "http://localhost:11000/api"
         const emailTemplate = se.outreach.stateList[se.outreachStateId].templateId;
@@ -165,6 +188,7 @@ export class EmailScheduleService {
         const sender = mailbox.emailId;
         const senderName = mailbox.name;
         let emailContent = this.renderEmailTemplate(emailTemplate, client);
+        let mailSubject = se.outreach.subject.replace(/{{company}}/g, client.company);
         console.log(`Email id: ${se.id}`);
         emailContent = await this.replaceUrlsWithShortenedUrls(emailContent, se.id);
         emailContent += `<img src="${process.env.WEB_URL}/email/track/${se.id}" style="display:none;" />`;
@@ -175,15 +199,16 @@ export class EmailScheduleService {
             const info = await this.smtpClient(se).sendMail({
                 from: `"${senderName}" <${sender}>`,
                 to: se.client.emailId,
-                subject: "Hello world",
+                subject: mailSubject,
                 html: emailContent,
             });
             console.log(`Email sent: ${info.response}`);
             se.state = ScheduledEmailState.SENT;
             se.delivered = true;
+            se.deliveryTime = new Date();
             se.deliveryStatus = info.response;
             se.messageId = info.messageId;
-            se.mailbox.sentEmails += 1;            
+            se.mailbox.sentEmails += 1;          
         } catch (error) {
             console.error(`Error sending email: ${error.message}`);
             console.error(error.stack);
